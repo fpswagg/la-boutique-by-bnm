@@ -1,0 +1,83 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "cart": "Cart",
+    "contact": "Contact"
+  },
+  "home": {
+    "hero_eyebrow": "High-tech & digital accessories",
+    "hero_tag": "PREMIUM TECH",
+    "hero_body": "Smartphones, smartwatches and digital accessories — carefully curated, available in Yaoundé.",
+    "hero_cta": "Browse the catalogue",
+    "hero_sub": "High-tech & digital accessories",
+    "featured_title": "Featured",
+    "featured_accent": "selection",
+    "featured_cta": "View all products",
+    "about_title": "ABOUT",
+    "about_accent": "us"
+  },
+  "products": {
+    "title": "PRODUCTS",
+    "accent": "catalogue",
+    "liked_section": "Your favourites",
+    "empty_liked": "No favourites yet.",
+    "all_products": "All products",
+    "view": "View",
+    "add_to_cart": "Add to cart",
+    "cart": "Cart",
+    "price_on_request": "Price on request"
+  },
+  "product": {
+    "back": "Back",
+    "add_to_cart": "Add to cart",
+    "added": "Added",
+    "price_on_request": "Price on request",
+    "related_title": "You may also like",
+    "share_title": "Share this product"
+  },
+  "cart": {
+    "title": "CART",
+    "accent": "my order",
+    "empty": "Your cart is empty.",
+    "empty_cta": "Discover products",
+    "qty": "Qty",
+    "total": "Total",
+    "order_whatsapp": "Order via WhatsApp",
+    "order_message": "Hello, I would like to order:\n",
+    "order_suffix": "\nPlease contact me to finalize the order.",
+    "liked_section": "Your favourites"
+  },
+  "contact": {
+    "title": "CONTACT",
+    "accent": "let's talk",
+    "bubble_1": "Looking for a product?",
+    "bubble_2": "A question about delivery?",
+    "bubble_3": "We're here for you!",
+    "whatsapp_cta": "Chat on WhatsApp",
+    "delivery_title": "Delivery",
+    "delivery_body": "Delivery price is discussed directly with the seller based on your location. Shipping is possible — conditions to discuss.",
+    "hours_title": "Opening Hours",
+    "location_title": "Location"
+  },
+  "share": {
+    "title": "Share",
+    "copy": "Copy link",
+    "copied": "Link copied!",
+    "native_share": "Share via..."
+  },
+  "common": {
+    "close": "Close",
+    "loading": "Loading...",
+    "currency": "FCFA",
+    "liked": "Favourite",
+    "unlike": "Remove from favourites",
+    "like": "Add to favourites",
+    "theme_light": "Light mode",
+    "theme_dark": "Dark mode",
+    "open_now": "Open",
+    "closed_now": "Closed",
+    "opens_at": "Opens at",
+    "closes_at": "Closes at"
+  }
+}

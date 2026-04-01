@@ -1,0 +1,262 @@
+[
+  {
+    "id": "apple-watch-serie-11",
+    "name": {
+      "en": "Apple Watch Series 11",
+      "fr": "Apple Watch Série 11",
+      "tr": "Apple Watch Seri 11"
+    },
+    "category": {
+      "en": "Smartwatches",
+      "fr": "Montres connectées",
+      "tr": "Akıllı Saatler"
+    },
+    "price": 100000,
+    "currency": "FCFA",
+    "images": [
+      "/products/apple-watch-serie-11_01.PNG",
+      "/products/apple-watch-serie-11_02.PNG"
+    ]
+  },
+  {
+    "id": "apple-watch-serie-10",
+    "name": {
+      "en": "Apple Watch Series 10",
+      "fr": "Apple Watch Série 10",
+      "tr": "Apple Watch Seri 10"
+    },
+    "category": {
+      "en": "Smartwatches",
+      "fr": "Montres connectées",
+      "tr": "Akıllı Saatler"
+    },
+    "price": 80000,
+    "currency": "FCFA",
+    "images": [
+      "/products/apple-watch-serie-10_01.PNG",
+      "/products/apple-watch-serie-10_02.PNG"
+    ]
+  },
+  {
+    "id": "airpods-max",
+    "name": {
+      "en": "AirPods Max",
+      "fr": "AirPods Max",
+      "tr": "AirPods Max"
+    },
+    "category": {
+      "en": "Wireless Earphones",
+      "fr": "Écouteurs sans fil",
+      "tr": "Kablosuz Kulaklıklar"
+    },
+    "price": 110000,
+    "currency": "FCFA",
+    "images": [
+      "/products/airpods-max_01.PNG",
+      "/products/airpods-max_02.PNG"
+    ]
+  },
+  {
+    "id": "chargeur-magsafe",
+    "name": {
+      "en": "MagSafe Charger",
+      "fr": "Chargeur MagSafe",
+      "tr": "MagSafe Şarj Cihazı"
+    },
+    "category": {
+      "en": "Accessories",
+      "fr": "Accessoires",
+      "tr": "Aksesuarlar"
+    },
+    "price": 10000,
+    "currency": "FCFA",
+    "images": [
+      "/products/chargeur-magsafe_01.PNG",
+      "/products/chargeur-magsafe_02.PNG",
+      "/products/chargeur-magsafe_03.PNG"
+    ]
+  },
+  {
+    "id": "powerbank-magsafe",
+    "name": {
+      "en": "MagSafe Powerbank",
+      "fr": "Powerbank MagSafe",
+      "tr": "MagSafe Powerbank"
+    },
+    "category": {
+      "en": "Accessories",
+      "fr": "Accessoires",
+      "tr": "Aksesuarlar"
+    },
+    "price": 10000,
+    "currency": "FCFA",
+    "images": [
+      "/products/powerbank-magsafe_01.PNG",
+      "/products/powerbank-magsafe_02.PNG",
+      "/products/powerbank-magsafe_03.PNG"
+    ]
+  },
+  {
+    "id": "airpods-4",
+    "name": {
+      "en": "AirPods 4",
+      "fr": "AirPods 4",
+      "tr": "AirPods 4"
+    },
+    "category": {
+      "en": "Wireless Earphones",
+      "fr": "Écouteurs sans fil",
+      "tr": "Kablosuz Kulaklıklar"
+    },
+    "price": 17500,
+    "currency": "FCFA",
+    "images": [
+      "/products/airpods-4_01.PNG",
+      "/products/airpods-4_02.PNG",
+      "/products/airpods-4_03.PNG"
+    ]
+  },
+  {
+    "id": "airpods-3",
+    "name": {
+      "en": "AirPods 3",
+      "fr": "AirPods 3",
+      "tr": "AirPods 3"
+    },
+    "category": {
+      "en": "Wireless Earphones",
+      "fr": "Écouteurs sans fil",
+      "tr": "Kablosuz Kulaklıklar"
+    },
+    "price": 13000,
+    "currency": "FCFA",
+    "images": [
+      "/products/airpods-3_01.PNG",
+      "/products/airpods-3_02.PNG",
+      "/products/airpods-3_03.PNG",
+      "/products/airpods-3_04.PNG"
+    ]
+  },
+  {
+    "id": "airpods-pro-2",
+    "name": {
+      "en": "AirPods Pro 2",
+      "fr": "AirPods Pro 2",
+      "tr": "AirPods Pro 2"
+    },
+    "category": {
+      "en": "Wireless Earphones",
+      "fr": "Écouteurs sans fil",
+      "tr": "Kablosuz Kulaklıklar"
+    },
+    "price": 11000,
+    "currency": "FCFA",
+    "images": [
+      "/products/airpods-pro-2_01.PNG",
+      "/products/airpods-pro-2_02.PNG"
+    ]
+  },
+  {
+    "id": "fun-shot-magnetic-grip-2",
+    "name": {
+      "en": "Fun Shot Magnetic Grip 2",
+      "fr": "Fun Shot Magnetic Grip 2",
+      "tr": "Fun Shot Magnetic Grip 2"
+    },
+    "category": {
+      "en": "Photo & Video Tools",
+      "fr": "Outils photos/vidéos",
+      "tr": "Fotoğraf & Video Araçları"
+    },
+    "price": 14000,
+    "currency": "FCFA",
+    "images": [
+      "/products/fun-shot-magnetic-grip-2_01.PNG",
+      "/products/fun-shot-magnetic-grip-2_02.PNG",
+      "/products/fun-shot-magnetic-grip-2_03.PNG",
+      "/products/fun-shot-magnetic-grip-2_04.PNG",
+      "/products/fun-shot-magnetic-grip-2_05.PNG"
+    ]
+  },
+  {
+    "id": "airtab-pocket-4",
+    "name": {
+      "en": "AirTab Pocket 4",
+      "fr": "AirTab Pocket 4",
+      "tr": "AirTab Pocket 4"
+    },
+    "category": {
+      "en": "Photo & Video Tools",
+      "fr": "Outils photos/vidéos",
+      "tr": "Fotoğraf & Video Araçları"
+    },
+    "price": 60000,
+    "currency": "FCFA",
+    "images": [
+      "/products/airtab-pocket-4_01.PNG",
+      "/products/airtab-pocket-4_02.PNG"
+    ]
+  },
+  {
+    "id": "projecteur-astronaute",
+    "name": {
+      "en": "Astronaut Projector",
+      "fr": "Projecteur astronaute",
+      "tr": "Astronot Projektör"
+    },
+    "category": {
+      "en": "Decorations",
+      "fr": "Décorations",
+      "tr": "Dekorasyonlar"
+    },
+    "price": 14000,
+    "currency": "FCFA",
+    "images": [
+      "/products/projecteur-astronaute_01.PNG",
+      "/products/projecteur-astronaute_02.PNG",
+      "/products/projecteur-astronaute_03.PNG"
+    ]
+  },
+  {
+    "id": "neon-led",
+    "name": {
+      "en": "Neon LED",
+      "fr": "Néon LED",
+      "tr": "Neon LED"
+    },
+    "category": {
+      "en": "Decorations",
+      "fr": "Décorations",
+      "tr": "Dekorasyonlar"
+    },
+    "price": null,
+    "currency": "FCFA",
+    "images": [
+      "/products/neon-led_01.PNG",
+      "/products/neon-led_02.PNG",
+      "/products/neon-led_03.PNG"
+    ]
+  },
+  {
+    "id": "phone-stabilizer",
+    "name": {
+      "en": "Phone Stabilizer",
+      "fr": "Stabilisateur de téléphone",
+      "tr": "Telefon Sabitleyici"
+    },
+    "category": {
+      "en": "Photo & Video Tools",
+      "fr": "Outils photos/vidéos",
+      "tr": "Fotoğraf & Video Araçları"
+    },
+    "price": null,
+    "currency": "FCFA",
+    "images": [
+      "/products/phone-stabilizer_01.PNG",
+      "/products/phone-stabilizer_02.PNG",
+      "/products/phone-stabilizer_03.PNG",
+      "/products/phone-stabilizer_04.PNG",
+      "/products/phone-stabilizer_05.PNG"
+    ]
+  }
+]

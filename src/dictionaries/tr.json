@@ -1,0 +1,83 @@
+{
+  "nav": {
+    "home": "Ana Sayfa",
+    "products": "Ürünler",
+    "cart": "Sepet",
+    "contact": "İletişim"
+  },
+  "home": {
+    "hero_eyebrow": "Yüksek teknoloji & dijital aksesuarlar",
+    "hero_tag": "PREMİUM TEKNOLOJİ",
+    "hero_body": "Akıllı telefonlar, saatler ve dijital aksesuarlar — özenle seçilmiş, Yaoundé'de mevcut.",
+    "hero_cta": "Kataloğu keşfet",
+    "hero_sub": "Yüksek teknoloji & dijital aksesuarlar",
+    "featured_title": "Öne",
+    "featured_accent": "çıkanlar",
+    "featured_cta": "Tüm ürünleri gör",
+    "about_title": "HAKKIMIZDA",
+    "about_accent": "biz"
+  },
+  "products": {
+    "title": "ÜRÜNLER",
+    "accent": "katalog",
+    "liked_section": "Favorileriniz",
+    "empty_liked": "Henüz favori yok.",
+    "all_products": "Tüm ürünler",
+    "view": "İncele",
+    "add_to_cart": "Sepete ekle",
+    "cart": "Sepet",
+    "price_on_request": "Fiyat bilgisi için iletişime geçin"
+  },
+  "product": {
+    "back": "Geri",
+    "add_to_cart": "Sepete ekle",
+    "added": "Eklendi",
+    "price_on_request": "Fiyat bilgisi için iletişime geçin",
+    "related_title": "Bunları da beğenebilirsiniz",
+    "share_title": "Bu ürünü paylaş"
+  },
+  "cart": {
+    "title": "SEPET",
+    "accent": "siparişim",
+    "empty": "Sepetiniz boş.",
+    "empty_cta": "Ürünleri keşfet",
+    "qty": "Adet",
+    "total": "Toplam",
+    "order_whatsapp": "WhatsApp ile sipariş ver",
+    "order_message": "Merhaba, sipariş vermek istiyorum:\n",
+    "order_suffix": "\nSiparişimi tamamlamak için lütfen benimle iletişime geçin.",
+    "liked_section": "Favorileriniz"
+  },
+  "contact": {
+    "title": "İLETİŞİM",
+    "accent": "konuşalım",
+    "bubble_1": "Bir ürün mü arıyorsunuz?",
+    "bubble_2": "Teslimat hakkında bir sorunuz mu var?",
+    "bubble_3": "Buradayız!",
+    "whatsapp_cta": "WhatsApp'tan yaz",
+    "delivery_title": "Teslimat",
+    "delivery_body": "Teslimat fiyatı, konumunuza göre satıcıyla doğrudan görüşülür. Kargo mümkündür — koşullar görüşülür.",
+    "hours_title": "Çalışma Saatleri",
+    "location_title": "Konum"
+  },
+  "share": {
+    "title": "Paylaş",
+    "copy": "Bağlantıyı kopyala",
+    "copied": "Bağlantı kopyalandı!",
+    "native_share": "Paylaş..."
+  },
+  "common": {
+    "close": "Kapat",
+    "loading": "Yükleniyor...",
+    "currency": "FCFA",
+    "liked": "Favori",
+    "unlike": "Favorilerden çıkar",
+    "like": "Favorilere ekle",
+    "theme_light": "Açık tema",
+    "theme_dark": "Koyu tema",
+    "open_now": "Açık",
+    "closed_now": "Kapalı",
+    "opens_at": "Açılış",
+    "closes_at": "Kapanış"
+  }
+}

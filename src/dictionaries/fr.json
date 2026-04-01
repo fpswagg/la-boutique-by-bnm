@@ -1,0 +1,83 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "cart": "Panier",
+    "contact": "Contact"
+  },
+  "home": {
+    "hero_eyebrow": "High-tech & accessoires numériques",
+    "hero_tag": "L'EXCELLENCE TECH",
+    "hero_body": "Smartphones, montres connectées et accessoires numériques — sélectionnés avec soin, disponibles à Yaoundé.",
+    "hero_cta": "Découvrir le catalogue",
+    "hero_sub": "High-tech & accessoires numériques",
+    "featured_title": "Sélection",
+    "featured_accent": "du moment",
+    "featured_cta": "Voir tous les produits",
+    "about_title": "À PROPOS",
+    "about_accent": "de nous"
+  },
+  "products": {
+    "title": "PRODUITS",
+    "accent": "catalogue",
+    "liked_section": "Vos favoris",
+    "empty_liked": "Aucun favori pour le moment.",
+    "all_products": "Tous les produits",
+    "view": "Voir",
+    "add_to_cart": "Ajouter au panier",
+    "cart": "Panier",
+    "price_on_request": "Prix sur demande"
+  },
+  "product": {
+    "back": "Retour",
+    "add_to_cart": "Ajouter au panier",
+    "added": "Ajouté",
+    "price_on_request": "Prix sur demande",
+    "related_title": "Vous aimerez aussi",
+    "share_title": "Partager ce produit"
+  },
+  "cart": {
+    "title": "PANIER",
+    "accent": "ma commande",
+    "empty": "Votre panier est vide.",
+    "empty_cta": "Découvrir les produits",
+    "qty": "Qté",
+    "total": "Total",
+    "order_whatsapp": "Commander via WhatsApp",
+    "order_message": "Bonjour, je souhaite commander :\n",
+    "order_suffix": "\nMerci de me contacter pour finaliser la commande.",
+    "liked_section": "Vos favoris"
+  },
+  "contact": {
+    "title": "CONTACT",
+    "accent": "discutons",
+    "bubble_1": "Vous cherchez un produit ?",
+    "bubble_2": "Une question sur la livraison ?",
+    "bubble_3": "On est là pour vous !",
+    "whatsapp_cta": "Discuter sur WhatsApp",
+    "delivery_title": "Livraison",
+    "delivery_body": "Le prix de livraison est à discuter directement avec le vendeur selon votre localisation. L'expédition est possible — conditions à discuter.",
+    "hours_title": "Horaires",
+    "location_title": "Localisation"
+  },
+  "share": {
+    "title": "Partager",
+    "copy": "Copier le lien",
+    "copied": "Lien copié !",
+    "native_share": "Partager via..."
+  },
+  "common": {
+    "close": "Fermer",
+    "loading": "Chargement...",
+    "currency": "FCFA",
+    "liked": "Favori",
+    "unlike": "Retirer des favoris",
+    "like": "Ajouter aux favoris",
+    "theme_light": "Mode clair",
+    "theme_dark": "Mode sombre",
+    "open_now": "Ouvert",
+    "closed_now": "Fermé",
+    "opens_at": "Ouvre à",
+    "closes_at": "Ferme à"
+  }
+}
