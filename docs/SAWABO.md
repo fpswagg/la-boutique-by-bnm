@@ -4,7 +4,17 @@ This route exposes **product snapshots** (catalog + extra metadata) and a **requ
 
 **Implementation:** `src/app/sawabo/route.ts`  
 **Storage logic:** `src/lib/sawabo.ts`  
-**Persisted file:** `data/sawabo.json` (created/updated at runtime)
+**Persisted file:** see [Storage paths](#storage-paths-deployment).
+
+---
+
+## Storage paths (deployment)
+
+| Environment | Default path | Notes |
+|-------------|--------------|--------|
+| Local / Node with writable project folder | `data/sawabo.json` under the project root | Same as the committed stub; runtime updates overwrite this file locally. |
+| Vercel, AWS Lambda, etc. | `/tmp/sawabo.json` | The deployment bundle (`/var/task/...`) is **read-only**. Only `/tmp` is writable. Data there is **ephemeral** (lost over time / new instances). |
+| Any host | Override with env | Set **`SAWABO_STORE_PATH`** to an absolute path (or path relative to `cwd`) on a **writable** volume if you need persistence (e.g. attached disk, self-hosted server). |
 
 ---
 
@@ -31,8 +41,8 @@ All responses are **JSON**. Send **`Content-Type: application/json`** for `POST`
 | Concern | Source |
 |--------|--------|
 | Product **names, prices, images, categories** | `data/products.json` (read via `src/lib/products.ts`) |
-| Extra **postedAt, updatedAt, tags, status, views** | `data/sawabo.json` → `productMeta` (auto-filled for each product id when missing) |
-| **Incoming work** (submissions, updates, deletes) | `POST /sawabo` → appended to `requests` in `data/sawabo.json` |
+| Extra **postedAt, updatedAt, tags, status, views** | Sawabo JSON store → `productMeta` (auto-filled for each product id when missing) |
+| **Incoming work** (submissions, updates, deletes) | `POST /sawabo` → appended to `requests` in the Sawabo JSON store |
 | **Human/bot review** | `PATCH /sawabo` → sets `approved` / `rejected` on a request |
 
 **Note:** Approving a request in Sawabo does **not** automatically edit `data/products.json` today. That step is for your bot or a future script.
@@ -100,7 +110,7 @@ curl -s "http://localhost:3000/sawabo?section=requests&requestStatus=pending&lim
 
 ## `POST /sawabo`
 
-Creates a **new request** and stores it in `data/sawabo.json`. Returns **201** with the created request.
+Creates a **new request** and persists it to the Sawabo JSON store (see [storage paths](#storage-paths-deployment)). Returns **201** with the created request.
 
 ### Body (JSON object)
 
@@ -321,9 +331,9 @@ Each item includes catalog fields plus Sawabo metadata:
 
 | Task | How |
 |------|-----|
-| Back up Sawabo data | Copy `data/sawabo.json` |
-| Reset requests only | Edit `data/sawabo.json` → set `"requests": []` (keep `productMeta` if you want) |
-| Full reset | Delete `data/sawabo.json`; it will be recreated with empty meta (product meta will be regenerated on next access) |
+| Back up Sawabo data | Copy the active store file (`data/sawabo.json` locally, or `/tmp/sawabo.json` on serverless — prefer `SAWABO_STORE_PATH` for a stable path in production). |
+| Reset requests only | Edit the store JSON → set `"requests": []` (keep `productMeta` if you want). |
+| Full reset | Delete the store file at the active path; it will be recreated with empty meta (product meta will be regenerated on next access). |
 
 ---
 

@@ -59,7 +59,33 @@ export interface SawaboProductDetails {
   views: number;
 }
 
-const STORE_PATH = path.join(process.cwd(), "data", "sawabo.json");
+/**
+ * Serverless runtimes (e.g. Vercel, AWS Lambda) mount the deployment at a read-only path
+ * (`/var/task/...`). Only `/tmp` is writable. Local/dev uses `data/sawabo.json`.
+ *
+ * Override with absolute path: `SAWABO_STORE_PATH=/path/to/sawabo.json`
+ */
+function computeStorePath(): string {
+  const override = process.env.SAWABO_STORE_PATH?.trim();
+  if (override) {
+    return path.isAbsolute(override)
+      ? override
+      : path.join(process.cwd(), override);
+  }
+
+  const serverless =
+    process.env.VERCEL === "1" ||
+    !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    !!process.env.AWS_EXECUTION_ENV;
+
+  if (serverless) {
+    return path.join("/tmp", "sawabo.json");
+  }
+
+  return path.join(process.cwd(), "data", "sawabo.json");
+}
+
+const STORE_PATH = computeStorePath();
 const STORE_DIR = path.dirname(STORE_PATH);
 
 function defaultStore(): SawaboStore {
