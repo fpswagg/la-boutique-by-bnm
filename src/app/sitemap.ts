@@ -1,10 +1,11 @@
 import { MetadataRoute } from "next";
 import { locales } from "../../middleware";
-import { products } from "@/lib/products";
+import { getAllProducts } from "@/lib/db/products";
 
 const BASE_URL = "https://laboutique-bnm.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await getAllProducts();
   const routes: MetadataRoute.Sitemap = [];
 
   for (const locale of locales) {

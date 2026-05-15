@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MapPin, Package, Truck } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
 import { STORE } from "@/constant";
+import { getOpeningHours, getStoreConfig } from "@/lib/db/store";
 import { ContactChat } from "@/components/sections/ContactChat";
 import { OpeningHours } from "@/components/sections/OpeningHours";
 import { buildWhatsAppContactUrl } from "@/lib/whatsapp";
@@ -16,14 +17,41 @@ export function generateMetadata({
   return { title: dict.contact.title };
 }
 
-export default function ContactPage({
+export default async function ContactPage({
   params,
 }: {
   params: { locale: Locale };
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
-  const whatsappUrl = buildWhatsAppContactUrl(dict.contact.bubble_1);
+  const [dbStoreConfig, dbOpeningHours] = await Promise.all([
+    getStoreConfig(),
+    getOpeningHours(),
+  ]);
+  const storeConfig = dbStoreConfig ?? {
+    id: "main",
+    name: STORE.name,
+    category: STORE.category,
+    description: STORE.description,
+    location: {
+      city: STORE.location.city,
+      country: STORE.location.country,
+      display: STORE.location.display,
+    },
+    email: STORE.email,
+    phone: STORE.phone,
+  };
+  const whatsappUrl = buildWhatsAppContactUrl(dict.contact.bubble_1, storeConfig.phone);
+  const openingHours =
+    dbOpeningHours.length > 0
+      ? dbOpeningHours
+      : STORE.openingHours.map((slot, i) => ({
+          day: slot.day,
+          order: i,
+          label: slot.label,
+          opensAt: slot.opensAt,
+          closesAt: slot.closesAt,
+        }));
 
   return (
     <div className="pt-24 min-h-screen">
@@ -47,7 +75,7 @@ export default function ContactPage({
           {/* Right column */}
           <div className="flex flex-col gap-8">
             {/* Opening hours */}
-            <OpeningHours dict={dict} locale={locale} />
+            <OpeningHours dict={dict} locale={locale} openingHours={openingHours} />
 
             {/* Delivery info */}
             <div className="border border-[var(--border)] p-6 bg-[var(--surface)]">
@@ -87,7 +115,7 @@ export default function ContactPage({
               </h3>
               <div className="flex items-center gap-3">
                 <MapPin size={18} className="text-[var(--muted)] shrink-0" />
-                <span className="text-sm">{STORE.location.display[locale]}</span>
+                <span className="text-sm">{storeConfig.location.display[locale]}</span>
               </div>
             </div>
           </div>

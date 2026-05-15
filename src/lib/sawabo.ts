@@ -1,6 +1,13 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { products, type Product } from "@/lib/products";
+/**
+ * Legacy compatibility layer for /sawabo route.
+ * Runtime state is stored in Prisma (see @/lib/sawabo/service).
+ */
+import {
+  createExternalRequest,
+  getPublishedProductsForSawabo,
+  listExternalRequests,
+  updateExternalRequestStatus,
+} from "@/lib/sawabo/service";
 
 export type SawaboRequestType =
   | "product_submission"
@@ -10,14 +17,6 @@ export type SawaboRequestType =
 
 export type SawaboRequestStatus = "pending" | "approved" | "rejected";
 export type SawaboPriority = "low" | "normal" | "high";
-
-export interface SawaboProductMeta {
-  postedAt: string;
-  updatedAt: string;
-  status: "published" | "archived";
-  tags: string[];
-  views: number;
-}
 
 export interface SawaboRequest {
   id: string;
@@ -35,17 +34,11 @@ export interface SawaboRequest {
   payload: Record<string, unknown>;
 }
 
-interface SawaboStore {
-  version: number;
-  productMeta: Record<string, SawaboProductMeta>;
-  requests: SawaboRequest[];
-}
-
 export interface SawaboProductDetails {
   id: string;
   slug: string;
-  name: Product["name"];
-  category: Product["category"];
+  name: { fr: string; en: string; tr: string };
+  category: { fr: string; en: string; tr: string };
   price: number | null;
   currency: string;
   images: string[];
@@ -59,148 +52,51 @@ export interface SawaboProductDetails {
   views: number;
 }
 
-/**
- * Serverless runtimes (e.g. Vercel, AWS Lambda) mount the deployment at a read-only path
- * (`/var/task/...`). Only `/tmp` is writable. Local/dev uses `data/sawabo.json`.
- *
- * Override with absolute path: `SAWABO_STORE_PATH=/path/to/sawabo.json`
- */
-function computeStorePath(): string {
-  const override = process.env.SAWABO_STORE_PATH?.trim();
-  if (override) {
-    return path.isAbsolute(override)
-      ? override
-      : path.join(process.cwd(), override);
-  }
-
-  const serverless =
-    process.env.VERCEL === "1" ||
-    !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
-    !!process.env.AWS_EXECUTION_ENV;
-
-  if (serverless) {
-    return path.join("/tmp", "sawabo.json");
-  }
-
-  return path.join(process.cwd(), "data", "sawabo.json");
-}
-
-const STORE_PATH = computeStorePath();
-const STORE_DIR = path.dirname(STORE_PATH);
-
-function defaultStore(): SawaboStore {
+function mapExternalRequest(row: Awaited<ReturnType<typeof listExternalRequests>>[number]): SawaboRequest {
+  const requestedBy = (row.requestedBy ?? {}) as Record<string, unknown>;
   return {
-    version: 1,
-    productMeta: {},
-    requests: [],
+    id: row.id,
+    type: row.type as SawaboRequestType,
+    status: row.status as SawaboRequestStatus,
+    priority: row.priority as SawaboPriority,
+    requestedAt: row.requestedAt.toISOString(),
+    reviewedAt: row.reviewedAt?.toISOString() ?? null,
+    reviewNote: row.reviewNote,
+    requestedBy: {
+      name: typeof requestedBy.name === "string" ? requestedBy.name : null,
+      contact: typeof requestedBy.contact === "string" ? requestedBy.contact : null,
+      channel: typeof requestedBy.channel === "string" ? requestedBy.channel : null,
+    },
+    payload: (row.payload ?? {}) as Record<string, unknown>,
   };
-}
-
-function nowIso(): string {
-  return new Date().toISOString();
-}
-
-function makeRequestId(): string {
-  const random = Math.random().toString(36).slice(2, 10);
-  return `req_${Date.now()}_${random}`;
-}
-
-function buildDefaultMeta(product: Product): SawaboProductMeta {
-  const timestamp = nowIso();
-  const seedTags = [
-    product.category.fr,
-    product.category.en,
-    product.category.tr,
-  ].map((tag) => tag.toLowerCase());
-
-  return {
-    postedAt: timestamp,
-    updatedAt: timestamp,
-    status: "published",
-    tags: Array.from(new Set(seedTags)),
-    views: 0,
-  };
-}
-
-async function ensureStoreFile(): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-
-  try {
-    await readFile(STORE_PATH, "utf8");
-  } catch {
-    await writeFile(STORE_PATH, JSON.stringify(defaultStore(), null, 2), "utf8");
-  }
-}
-
-function normalizeStore(raw: unknown): SawaboStore {
-  if (!raw || typeof raw !== "object") return defaultStore();
-
-  const candidate = raw as Partial<SawaboStore>;
-  return {
-    version: typeof candidate.version === "number" ? candidate.version : 1,
-    productMeta:
-      candidate.productMeta && typeof candidate.productMeta === "object"
-        ? (candidate.productMeta as Record<string, SawaboProductMeta>)
-        : {},
-    requests: Array.isArray(candidate.requests)
-      ? (candidate.requests as SawaboRequest[])
-      : [],
-  };
-}
-
-async function saveStore(store: SawaboStore): Promise<void> {
-  await writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
-}
-
-export async function readSawaboStore(): Promise<SawaboStore> {
-  await ensureStoreFile();
-  const content = await readFile(STORE_PATH, "utf8");
-  const parsed = JSON.parse(content);
-  const store = normalizeStore(parsed);
-
-  let changed = false;
-  for (const product of products) {
-    if (!store.productMeta[product.id]) {
-      store.productMeta[product.id] = buildDefaultMeta(product);
-      changed = true;
-    }
-  }
-
-  if (changed) {
-    await saveStore(store);
-  }
-
-  return store;
 }
 
 export async function listSawaboProducts(): Promise<SawaboProductDetails[]> {
-  const store = await readSawaboStore();
+  const rows = await getPublishedProductsForSawabo();
+  const now = new Date().toISOString();
 
-  return products.map((product) => {
-    const meta = store.productMeta[product.id] ?? buildDefaultMeta(product);
-    return {
-      id: product.id,
-      slug: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      currency: product.currency,
-      images: product.images,
-      primaryImage: product.images[0] ?? null,
-      imageCount: product.images.length,
-      hasPrice: product.price !== null,
-      postedAt: meta.postedAt,
-      updatedAt: meta.updatedAt,
-      status: meta.status,
-      tags: meta.tags,
-      views: meta.views,
-    };
-  });
+  return rows.map((product) => ({
+    id: product.id,
+    slug: product.id,
+    name: { fr: product.nameFr, en: product.nameFr, tr: product.nameFr },
+    category: { fr: "", en: "", tr: "" },
+    price: product.price,
+    currency: product.currency,
+    images: product.images,
+    primaryImage: product.images[0] ?? null,
+    imageCount: product.images.length,
+    hasPrice: product.price !== null,
+    postedAt: now,
+    updatedAt: now,
+    status: "published",
+    tags: product.tags,
+    views: 0,
+  }));
 }
 
 export async function listSawaboRequests(): Promise<SawaboRequest[]> {
-  const store = await readSawaboStore();
-  return store.requests;
+  const rows = await listExternalRequests();
+  return rows.map(mapExternalRequest);
 }
 
 export async function createSawaboRequest(input: {
@@ -213,27 +109,15 @@ export async function createSawaboRequest(input: {
   };
   payload?: Record<string, unknown>;
 }): Promise<SawaboRequest> {
-  const store = await readSawaboStore();
-
-  const request: SawaboRequest = {
-    id: makeRequestId(),
+  const id = `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const row = await createExternalRequest({
+    id,
     type: input.type,
-    status: "pending",
-    priority: input.priority ?? "normal",
-    requestedAt: nowIso(),
-    reviewedAt: null,
-    reviewNote: null,
-    requestedBy: {
-      name: input.requestedBy?.name ?? null,
-      contact: input.requestedBy?.contact ?? null,
-      channel: input.requestedBy?.channel ?? null,
-    },
-    payload: input.payload ?? {},
-  };
-
-  store.requests.unshift(request);
-  await saveStore(store);
-  return request;
+    priority: input.priority,
+    requestedBy: input.requestedBy,
+    payload: input.payload,
+  });
+  return mapExternalRequest(row);
 }
 
 export async function reviewSawaboRequest(input: {
@@ -241,14 +125,14 @@ export async function reviewSawaboRequest(input: {
   status: Extract<SawaboRequestStatus, "approved" | "rejected">;
   reviewNote?: string | null;
 }): Promise<SawaboRequest | null> {
-  const store = await readSawaboStore();
-  const request = store.requests.find((item) => item.id === input.requestId);
-  if (!request) return null;
-
-  request.status = input.status;
-  request.reviewNote = input.reviewNote ?? null;
-  request.reviewedAt = nowIso();
-
-  await saveStore(store);
-  return request;
+  try {
+    const row = await updateExternalRequestStatus({
+      id: input.requestId,
+      status: input.status,
+      reviewNote: input.reviewNote ?? undefined,
+    });
+    return mapExternalRequest(row);
+  } catch {
+    return null;
+  }
 }

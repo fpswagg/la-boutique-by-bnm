@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, MapPin, Mail, Phone } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
-import { products } from "@/lib/products";
+import { getAllProducts } from "@/lib/db/products";
+import { getOpeningHours, getStoreConfig } from "@/lib/db/store";
 import { STORE } from "@/constant";
 import { Banner } from "@/components/layout/Banner";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -36,7 +37,35 @@ export default async function HomePage({
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
+  const [products, dbStoreConfig, dbOpeningHours] = await Promise.all([
+    getAllProducts(),
+    getStoreConfig(),
+    getOpeningHours(),
+  ]);
   const featured = products.slice(0, 6);
+  const storeConfig = dbStoreConfig ?? {
+    id: "main",
+    name: STORE.name,
+    category: STORE.category,
+    description: STORE.description,
+    location: {
+      city: STORE.location.city,
+      country: STORE.location.country,
+      display: STORE.location.display,
+    },
+    email: STORE.email,
+    phone: STORE.phone,
+  };
+  const openingHours =
+    dbOpeningHours.length > 0
+      ? dbOpeningHours
+      : STORE.openingHours.map((slot, i) => ({
+          day: slot.day,
+          order: i,
+          label: slot.label,
+          opensAt: slot.opensAt,
+          closesAt: slot.closesAt,
+        }));
 
   return (
     <div>
@@ -104,30 +133,30 @@ export default async function HomePage({
               {dict.home.about_title}
             </h2>
             <p className="text-[var(--muted)] leading-relaxed text-base">
-              {STORE.description[locale]}
+              {storeConfig.description[locale]}
             </p>
 
             <div className="mt-8 flex flex-col gap-3">
               <div className="flex items-center gap-3 text-sm">
                 <MapPin size={16} className="text-[var(--muted)] shrink-0" />
-                <span>{STORE.location.display[locale]}</span>
+                <span>{storeConfig.location.display[locale]}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Mail size={16} className="text-[var(--muted)] shrink-0" />
                 <a
-                  href={`mailto:${STORE.email}`}
+                  href={`mailto:${storeConfig.email}`}
                   className="hover:opacity-60 transition-opacity"
                 >
-                  {STORE.email}
+                  {storeConfig.email}
                 </a>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Phone size={16} className="text-[var(--muted)] shrink-0" />
                 <a
-                  href={`tel:${STORE.phone}`}
+                  href={`tel:${storeConfig.phone}`}
                   className="hover:opacity-60 transition-opacity"
                 >
-                  {STORE.phone}
+                  {storeConfig.phone}
                 </a>
               </div>
             </div>
@@ -144,7 +173,7 @@ export default async function HomePage({
           </div>
 
           {/* Opening hours */}
-          <OpeningHours dict={dict} locale={locale} />
+          <OpeningHours dict={dict} locale={locale} openingHours={openingHours} />
         </div>
       </section>
     </div>

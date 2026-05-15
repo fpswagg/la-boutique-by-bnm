@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@/lib/i18n";
-import { products, groupByCategory } from "@/lib/products";
+import { groupByCategory } from "@/lib/products";
+import { getAllProducts } from "@/lib/db/products";
 import { ShareDialog } from "@/components/ui/ShareDialog";
 import { ProductsClient } from "@/components/sections/ProductsClient";
 import type { Locale } from "../../../../middleware";
@@ -17,13 +18,14 @@ export function generateMetadata({
   };
 }
 
-export default function ProductsPage({
+export default async function ProductsPage({
   params,
 }: {
   params: { locale: Locale };
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
+  const products = await getAllProducts();
   const grouped = groupByCategory(products, locale);
 
   return (

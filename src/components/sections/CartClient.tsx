@@ -9,9 +9,8 @@ import {
   getProduct,
   getProductName,
   formatPrice,
-  products as allProductsList,
+  type Product,
 } from "@/lib/products";
-import type { Product } from "@/lib/products";
 import { buildWhatsAppOrderUrl } from "@/lib/whatsapp";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,28 +20,36 @@ import type { Locale } from "../../../middleware";
 interface CartClientProps {
   dict: Dictionary;
   locale: Locale;
+  allProducts: Product[];
+  phone: string;
 }
 
-export function CartClient({ dict, locale }: CartClientProps) {
+export function CartClient({ dict, locale, allProducts, phone }: CartClientProps) {
   const { items, updateQty, removeItem } = useCart();
   const { likedIds } = useLikes();
 
   const likedProducts = likedIds
-    .map((id) => allProductsList.find((p) => p.id === id))
+    .map((id) => allProducts.find((p) => p.id === id))
     .filter(Boolean) as Product[];
 
   const cartProducts = items
-    .map((item) => ({ item, product: getProduct(item.id) }))
+    .map((item) => ({ item, product: getProduct(allProducts, item.id) }))
     .filter((x): x is { item: typeof items[0]; product: Product } => !!x.product);
 
   const total = cartProducts.reduce((sum, { item, product }) => {
     return sum + (product.price ?? 0) * item.qty;
   }, 0);
 
-  const whatsappUrl = buildWhatsAppOrderUrl(items, locale, {
-    order_message: dict.cart.order_message,
-    order_suffix: dict.cart.order_suffix,
-  });
+  const whatsappUrl = buildWhatsAppOrderUrl(
+    items,
+    allProducts,
+    locale,
+    {
+      order_message: dict.cart.order_message,
+      order_suffix: dict.cart.order_suffix,
+    },
+    phone
+  );
 
   return (
     <div className="grid lg:grid-cols-3 gap-12">

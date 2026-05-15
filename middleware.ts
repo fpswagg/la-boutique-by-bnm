@@ -27,6 +27,21 @@ function getLocale(request: NextRequest): Locale {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const dashboardSecret = process.env.DASHBOARD_PASSWORD;
+
+  // Secret dashboard route: /dashboard/{DASHBOARD_PASSWORD}/...
+  if (pathname.startsWith("/dashboard")) {
+    const parts = pathname.split("/").filter(Boolean);
+    const token = parts[1] ?? "";
+
+    if (!dashboardSecret || token !== dashboardSecret) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/404";
+      return NextResponse.rewrite(url);
+    }
+
+    return NextResponse.next();
+  }
 
   // Skip for static files, API routes, Next internals
   if (

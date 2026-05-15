@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { locales, type Locale } from "../../../middleware";
 import { getDictionary } from "@/lib/i18n";
+import { getStoreConfig } from "@/lib/db/store";
+import { STORE } from "@/constant";
 import { Providers } from "@/components/providers/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -35,7 +37,7 @@ export function generateMetadata({
   };
 }
 
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: {
@@ -43,7 +45,21 @@ export default function LocaleLayout({
   params: { locale: Locale };
 }) {
   const { locale } = params;
+  const storeConfig = await getStoreConfig();
   const dict = getDictionary(locale);
+  const footerStore = storeConfig ?? {
+    id: "main",
+    name: STORE.name,
+    category: STORE.category,
+    description: STORE.description,
+    location: {
+      city: STORE.location.city,
+      country: STORE.location.country,
+      display: STORE.location.display,
+    },
+    email: STORE.email,
+    phone: STORE.phone,
+  };
 
   return (
     <>
@@ -51,7 +67,7 @@ export default function LocaleLayout({
       <Providers>
         <Navbar dict={dict} locale={locale} />
         <main className="min-h-screen">{children}</main>
-        <Footer dict={dict} locale={locale} />
+        <Footer dict={dict} locale={locale} store={footerStore} />
       </Providers>
     </>
   );

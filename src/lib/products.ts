@@ -1,5 +1,4 @@
 import type { Locale } from "../../middleware";
-import rawProducts from "../../data/products.json";
 
 export interface TranslatableField {
   en: string;
@@ -14,12 +13,15 @@ export interface Product {
   currency: string;
   images: string[];
   category: TranslatableField;
+  stock?: number;
+  tags?: string[];
+  views?: number;
+  postedAt?: Date;
+  updatedAt?: Date;
 }
 
-export const products: Product[] = rawProducts as Product[];
-
-export function getProduct(id: string): Product | undefined {
-  return products.find((p) => p.id === id);
+export function getProduct(productList: Product[], id: string): Product | undefined {
+  return productList.find((p) => p.id === id);
 }
 
 export function getProductName(product: Product, locale: Locale): string {
@@ -30,9 +32,13 @@ export function getProductCategory(product: Product, locale: Locale): string {
   return product.category[locale] ?? product.category.fr;
 }
 
-export function getRelatedProducts(product: Product, locale: Locale): Product[] {
+export function getRelatedProducts(
+  productList: Product[],
+  product: Product,
+  locale: Locale
+): Product[] {
   const cat = product.category[locale] ?? product.category.fr;
-  return products.filter(
+  return productList.filter(
     (p) => p.id !== product.id && (p.category[locale] ?? p.category.fr) === cat
   );
 }

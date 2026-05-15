@@ -1,5 +1,8 @@
 import { getDictionary } from "@/lib/i18n";
 import { CartClient } from "@/components/sections/CartClient";
+import { getAllProducts } from "@/lib/db/products";
+import { getStoreConfig } from "@/lib/db/store";
+import { STORE } from "@/constant";
 import type { Locale } from "../../../../middleware";
 import type { Metadata } from "next";
 
@@ -12,13 +15,18 @@ export function generateMetadata({
   return { title: dict.cart.title };
 }
 
-export default function CartPage({
+export default async function CartPage({
   params,
 }: {
   params: { locale: Locale };
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
+  const [allProducts, storeConfig] = await Promise.all([
+    getAllProducts(),
+    getStoreConfig(),
+  ]);
+  const phone = storeConfig?.phone ?? STORE.phone;
 
   return (
     <div className="pt-24 min-h-screen">
@@ -32,7 +40,7 @@ export default function CartPage({
           </h1>
         </div>
 
-        <CartClient dict={dict} locale={locale} />
+        <CartClient dict={dict} locale={locale} allProducts={allProducts} phone={phone} />
       </div>
     </div>
   );

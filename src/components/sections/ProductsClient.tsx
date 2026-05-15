@@ -2,7 +2,6 @@
 
 import { useLikes } from "@/context/LikesContext";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { products as allProductsList } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "../../../middleware";
@@ -19,10 +18,11 @@ export function ProductsClient({
   dict,
   locale,
   grouped,
+  allProducts,
 }: ProductsClientProps) {
   const { likedIds } = useLikes();
   const likedProducts = likedIds
-    .map((id) => allProductsList.find((p) => p.id === id))
+    .map((id) => allProducts.find((p) => p.id === id))
     .filter(Boolean) as Product[];
 
   return (

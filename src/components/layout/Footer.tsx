@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { STORE } from "@/constant";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "../../../middleware";
+
+interface FooterStoreContent {
+  description: { fr: string; en: string; tr: string };
+  location: { display: { fr: string; en: string; tr: string } };
+  email: string;
+  phone: string;
+}
 
 interface FooterProps {
   dict: Dictionary;
   locale: Locale;
+  store: FooterStoreContent;
 }
 
-export function Footer({ dict, locale }: FooterProps) {
+export function Footer({ dict, locale, store }: FooterProps) {
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--surface)] mt-24">
       <div className="mx-auto max-w-7xl px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -16,7 +23,7 @@ export function Footer({ dict, locale }: FooterProps) {
         <div>
           <p className="font-display text-2xl tracking-wider mb-3">LA BOUTIQUE</p>
           <p className="text-sm text-[var(--muted)] leading-relaxed">
-            {STORE.description[locale]}
+            {store.description[locale]}
           </p>
         </div>
 
@@ -49,18 +56,18 @@ export function Footer({ dict, locale }: FooterProps) {
           <p className="text-xs font-medium tracking-widest uppercase text-[var(--muted)] mb-4">
             {dict.contact.location_title}
           </p>
-          <p className="text-sm mb-2">{STORE.location.display[locale]}</p>
+          <p className="text-sm mb-2">{store.location.display[locale]}</p>
           <a
-            href={`mailto:${STORE.email}`}
+            href={`mailto:${store.email}`}
             className="text-sm hover:opacity-60 transition-opacity block mb-1"
           >
-            {STORE.email}
+            {store.email}
           </a>
           <a
-            href={`tel:${STORE.phone}`}
+            href={`tel:${store.phone}`}
             className="text-sm hover:opacity-60 transition-opacity block"
           >
-            {STORE.phone}
+            {store.phone}
           </a>
         </div>
       </div>

@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductStatus {
+  published
+  archived
+}
+
+enum AnalyticsEvent {
+  view
+  add_to_cart
+  like
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum OrderChannel {
+  whatsapp
+  dashboard
+  api
+}
+
+model Product {
+  id         String        @id
+  nameFr     String
+  nameEn     String
+  nameTr     String
+  categoryFr String
+  categoryEn String
+  categoryTr String
+  price      Int?
+  currency   String
+  images     String[]
+  status     ProductStatus @default(published)
+  tags       String[]
+  stock      Int           @default(0)
+  views      Int           @default(0)
+  postedAt   DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  analytics  Analytics[]
+}
+
+model StoreConfig {
+  id              String        @id @default("main")
+  nameFr          String
+  nameEn          String
+  nameTr          String
+  categoryFr      String
+  categoryEn      String
+  categoryTr      String
+  descriptionFr   String
+  descriptionEn   String
+  descriptionTr   String
+  locationCity    String
+  locationCountry String
+  locationFr      String
+  locationEn      String
+  locationTr      String
+  email           String
+  phone           String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  openingHours    OpeningHour[]
+}
+
+model OpeningHour {
+  id            Int         @id @default(autoincrement())
+  day           String      @unique
+  order         Int
+  labelFr       String
+  labelEn       String
+  labelTr       String
+  opensAt       Int
+  closesAt      Int
+  storeConfigId String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  storeConfig   StoreConfig @relation(fields: [storeConfigId], references: [id], onDelete: Cascade)
+}
+
+model Analytics {
+  id         BigInt         @id @default(autoincrement())
+  event      AnalyticsEvent
+  locale     String?
+  productId  String?
+  createdAt  DateTime       @default(now())
+
+  product    Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([event])
+  @@index([productId])
+}
+
+model Order {
+  id          BigInt       @id @default(autoincrement())
+  items       Json
+  totalAmount Int?
+  status      OrderStatus  @default(pending)
+  channel     OrderChannel @default(whatsapp)
+  note        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model SawaboSessionConfig {
+  id                 String   @id @default("default")
+  sessionKey         String
+  botBaseUrl         String
+  webhookSecret      String
+  callbackUrl        String?
+  callbackSecret     String?
+  enabled            Boolean  @default(true)
+  maxRequestsPerHour Int      @default(60)
+  defaultGroupIds    String[] @default([])
+  allowedActions     String[] @default([])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model SawaboWebhookRequest {
+  id          BigInt    @id @default(autoincrement())
+  requestId   String    @unique
+  action      String
+  data        Json      @default("{}")
+  status      String    @default("pending")
+  httpStatus  Int?
+  execution   String    @default("sync")
+  result      Json?
+  error       Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  callbacks SawaboWebhookCallback[]
+
+  @@index([action])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SawaboWebhookCallback {
+  id             BigInt    @id @default(autoincrement())
+  requestId      String
+  action         String
+  status         String
+  payload        Json
+  signatureValid Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  request SawaboWebhookRequest? @relation(fields: [requestId], references: [requestId], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([createdAt])
+}
+
+model SawaboExternalRequest {
+  id          String    @id
+  type        String
+  status      String    @default("pending")
+  priority    String    @default("normal")
+  requestedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+  reviewNote  String?
+  requestedBy Json      @default("{}")
+  payload     Json      @default("{}")
+
+  @@index([status])
+  @@index([requestedAt])
+}

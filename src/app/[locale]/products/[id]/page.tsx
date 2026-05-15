@@ -3,7 +3,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
-import { products, getProduct, getProductName, getRelatedProducts, formatPrice } from "@/lib/products";
+import { getProductName, formatPrice } from "@/lib/products";
+import {
+  getAllProducts,
+  getProductById,
+  getRelatedProducts,
+  incrementProductViews,
+} from "@/lib/db/products";
+import { recordEvent } from "@/lib/db/analytics";
 import { ImageGallery } from "@/components/ui/ImageGallery";
 import { LikeButton } from "@/components/ui/LikeButton";
 import { CartButton } from "@/components/ui/CartButton";
@@ -11,16 +18,17 @@ import { ShareDialog } from "@/components/ui/ShareDialog";
 import { ProductCard } from "@/components/ui/ProductCard";
 import type { Locale } from "../../../../../middleware";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await getAllProducts({ includeArchived: true });
   return products.map((p) => ({ id: p.id }));
 }
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
   params: { locale: Locale; id: string };
-}): Metadata {
-  const product = getProduct(params.id);
+}): Promise<Metadata> {
+  const product = await getProductById(params.id);
   if (!product) return {};
   const dict = getDictionary(params.locale);
   const name = getProductName(product, params.locale);
@@ -35,14 +43,19 @@ export function generateMetadata({
   };
 }
 
-export default function ProductPage({
+export default async function ProductPage({
   params,
 }: {
   params: { locale: Locale; id: string };
 }) {
   const { locale, id } = params;
-  const product = getProduct(id);
+  const product = await getProductById(id);
   if (!product) notFound();
+
+  await Promise.all([
+    incrementProductViews(id),
+    recordEvent({ event: "view", productId: id, locale }),
+  ]);
 
   const dict = getDictionary(locale);
   const name = getProductName(product, locale);
@@ -50,7 +63,7 @@ export default function ProductPage({
   const priceStr = product.price !== null
     ? formatPrice(product.price, product.currency)
     : null;
-  const related = getRelatedProducts(product, locale).slice(0, 4);
+  const related = (await getRelatedProducts(product.id, locale)).slice(0, 4);
 
   return (
     <div className="pt-24">

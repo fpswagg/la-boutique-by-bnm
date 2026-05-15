@@ -1,144 +1,161 @@
-# La Boutique by BNM — Developer guide
+# La Boutique by BNM — Developer Guide
 
-This document explains **where to change data** (products, shop info, languages, URLs) without digging through the whole codebase. The app is a Next.js site; most day-to-day edits are JSON or a single TypeScript file.
+This project now runs with **Prisma + Supabase**:
 
----
-
-## 1. Products (catalog)
-
-**File:** `data/products.json`
-
-This is the **only place** the product list is defined. The site reads it through `src/lib/products.ts` — you do not need to touch that file for normal catalog updates.
-
-### What each product looks like
-
-| Field | Purpose |
-| ----- | ------- |
-| `id` | **Stable URL slug.** Used in links like `/fr/products/your-id-here`. Use lowercase, hyphens, no spaces. Changing `id` breaks old links and cart/likes stored in the browser for that id. |
-| `name` | Object with `en`, `fr`, `tr` — display name per language. |
-| `category` | Same shape — used for grouping on the products page and “related” items. |
-| `price` | Number in the store’s currency, or `null` if you want “price on request” style messaging. |
-| `currency` | Short code shown with the price (e.g. `FCFA`). |
-| `images` | Array of **paths** starting at the site root, e.g. `"/products/my-product_01.PNG"`. Files must live under `public/`. |
-
-### Adding a new product
-
-1. Put image files in `public/products/` (keep names consistent, e.g. `my-gadget_01.PNG`).
-2. Add a new object to the **array** in `data/products.json` (same structure as existing entries).
-3. Ensure `id` is unique and image paths match real files (case-sensitive on many servers).
-
-### Removing a product
-
-Delete its object from `data/products.json`. Old URLs for that `id` will show the site’s not-found page.
+- **Storefront reads from DB** (not from `data/products.json` directly).
+- **Admin dashboard lives at a secret URL** (`/dashboard/<DASHBOARD_PASSWORD>`).
+- **Images are uploaded as files** to Supabase Storage and old images are cleaned up when removed.
 
 ---
 
-## 2. Shop details (contact, hours, WhatsApp)
+## 1) Quick setup
 
-**File:** `src/constant.ts`
-
-Everything under `STORE` is shop identity and contact data used in the footer, contact page, opening hours, and WhatsApp links.
-
-| Part of `STORE` | What to change |
-| --------------- | -------------- |
-| `name`, `category`, `description` | Objects with `en`, `fr`, `tr` — branding and long description. |
-| `location` | `city` / `country` plus `display.{en,fr,tr}` for the line shown in the UI. |
-| `email`, `phone` | Plain strings. **WhatsApp** uses `phone`: spaces are stripped in code; keep a normal readable format if you like. |
-| `openingHours` | One entry per day. Each has `day` (internal id), `label.{en,fr,tr}`, `opensAt` / `closesAt` as **milliseconds from midnight** (see comments in the file for examples). |
-
-Changing `phone` here updates WhatsApp order and contact links automatically (`src/lib/whatsapp.ts` reads `STORE.phone`).
+1. Copy `.env.example` to `.env.local`.
+2. Fill all variables.
+3. Run installs and Prisma:
+   - `pnpm install`
+   - `npx prisma generate`
+   - `npx prisma migrate deploy` (or `npx prisma migrate dev` locally)
+   - `npx prisma db seed`
+4. Start app: `pnpm dev`
 
 ---
 
-## 3. UI text (buttons, labels, pages)
+## 2) Required environment variables
 
-**Folder:** `src/dictionaries/`
+Defined in `.env.example`:
 
-| File | Language |
-| ---- | -------- |
-| `fr.json` | French |
-| `en.json` | English |
-| `tr.json` | Turkish |
-
-These files mirror the same **keys**; only the string values differ. Edit the value you need (e.g. `nav.cart`, `home.featured_title`, `contact.delivery_body`).  
-
-**Rule:** If you add a new key in one file, add it in **all three** with the same key path, or TypeScript may complain and some locales will fall back incorrectly.
-
-**Loading:** Dictionaries are imported in `src/lib/i18n.ts` — you rarely need to change that file unless you add a **new language** (see section 5).
+- `DATABASE_URL` (Supabase pooled URL; used by the Next.js app and `prisma/seed.ts`)
+- `DIRECT_URL` (Supabase direct TCP URL; used as `datasource.url` in `prisma.config.ts` for Prisma CLI / migrations — v7 removed `directUrl` from config)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_STORAGE_BUCKET` (default: `product-images`)
+- `DASHBOARD_PASSWORD` (secret path token)
 
 ---
 
-## 4. Site URL, favicon, and SEO
+## 3) Dashboard access (no visible button)
 
-Several places use the public site URL or icons. Keep them in sync when you change domain or branding assets.
+The dashboard is intentionally hidden from public navigation.
 
-| What | Where |
-| ---- | ----- |
-| Default metadata, favicon | `src/app/layout.tsx` — `metadata` (e.g. `metadataBase`, `icons`) |
-| Per-locale metadata (Open Graph, etc.) | `src/app/[locale]/layout.tsx` — `generateMetadata` |
-| Sitemap URLs | `src/app/sitemap.ts` — constant `BASE_URL` at the top |
+- Access pattern: `/dashboard/<DASHBOARD_PASSWORD>`
+- Example: `/dashboard/my-very-secret-token`
+- Wrong token returns a 404-style response.
 
-Product and page URLs in the sitemap are built from `BASE_URL` + locale + routes; product slugs still come from `data/products.json`.
+Main pages:
 
----
-
-## 5. Languages and default locale
-
-**File:** `middleware.ts` (project root)
-
-| Export / constant | Role |
-| ----------------- | ---- |
-| `locales` | Supported language codes (e.g. `fr`, `en`, `tr`). |
-| `defaultLocale` | Fallback when no cookie and no matching browser language. |
-| `getLocale` logic | Cookie `NEXT_LOCALE` first, then `Accept-Language`, then default. |
-
-Adding a new language is a larger change: extend `locales`, add `src/dictionaries/xx.json`, register it in `src/lib/i18n.ts`, and add static params / routes as needed.
+- `/dashboard/<token>` → overview + analytics
+- `/dashboard/<token>/products` → product CRUD and stock updates
+- `/dashboard/<token>/products/new` → create product with file uploads
+- `/dashboard/<token>/products/<id>` → edit product, delete image, add images
+- `/dashboard/<token>/store` → update store profile and opening hours
 
 ---
 
-## 6. Static assets (logos and product photos)
+## 4) Data source of truth
 
-| Asset | Location |
-| ----- | -------- |
-| Store logos (banner, theme) | `public/logo-dark.png`, `public/logo-light.png` |
-| Product images | `public/products/` — paths in JSON must match (including extension case) |
+### Runtime source
 
-The banner component (`src/components/layout/Banner.tsx`) picks light vs dark logo from the current theme; metadata icons are set in layouts as documented in section 4.
+- Products, stock, analytics, store config, opening hours: **PostgreSQL (Supabase)**
+- Product images: **Supabase Storage**
 
----
+### Seed/bootstrap source
 
-## 7. When you need the code (quick map)
+- `data/products.json`
+- `src/constant.ts`
+- `public/products/*`
 
-| Goal | Likely files |
-| ---- | -------------- |
-| Change banner height / crop | `src/components/layout/Banner.tsx` |
-| Navbar, footer layout | `src/components/layout/Navbar.tsx`, `Footer.tsx` |
-| Cart / likes behavior | `src/context/CartContext.tsx`, `LikesContext.tsx` |
-| WhatsApp message templates | `src/lib/whatsapp.ts` + dictionary keys `cart.order_message`, `cart.order_suffix`, etc. |
-| Global colors / themes | `src/app/globals.css`, `tailwind.config.ts` |
+These files are used by `prisma/seed.ts` to initialize DB/storage. After seeding, storefront uses DB data.
 
 ---
 
-## 8. Running the project
+## 5) File map (important backend files)
 
-From the project folder:
-
-- Install dependencies: `npm install` or `pnpm install` (use what your team standardizes on).
-- Development: `npm run dev` or `pnpm dev`.
-- Production build: `npm run build` or `pnpm build`.
-
-The app uses locale-prefixed routes (`/fr`, `/en`, `/tr`). The root `/` redirects to the default locale.
+| Purpose | File |
+| --- | --- |
+| Prisma schema | `prisma/schema.prisma` |
+| Prisma config (v7) | `prisma.config.ts` |
+| Seed script | `prisma/seed.ts` |
+| Prisma singleton | `src/lib/db.ts` |
+| Supabase server client | `src/lib/supabase.ts` |
+| DB product helpers | `src/lib/db/products.ts` |
+| DB store helpers | `src/lib/db/store.ts` |
+| DB analytics helpers | `src/lib/db/analytics.ts` |
+| Dashboard actions | `src/app/dashboard/[token]/actions.ts` |
 
 ---
 
-## Summary checklist
+## 6) How product CRUD works
 
-| I want to… | Edit |
-| ---------- | ---- |
-| Add / edit / remove a product | `data/products.json` + images in `public/products/` |
-| Change address, email, phone, hours, descriptions | `src/constant.ts` |
-| Change button or page wording | `src/dictionaries/fr.json`, `en.json`, `tr.json` (same keys) |
-| Change domain or sitemap base URL | `src/app/sitemap.ts` and metadata in `layout.tsx` files |
-| Change default or supported languages | `middleware.ts` (+ full i18n setup for a new language) |
+### Create
 
-If you keep products and `STORE` in sync with your real inventory and contact details, the storefront, cart WhatsApp messages, and footer will stay aligned without code changes in multiple places.
+- Form sends translatable fields (`fr/en/tr`), price, stock, status, tags, files.
+- Server action uploads files to Supabase Storage.
+- Public URLs are saved in DB `Product.images`.
+- Storefront pages are revalidated.
+
+### Update
+
+- Existing image URLs are kept through hidden fields.
+- New files are uploaded and merged.
+- Removed old URLs are deleted from Supabase Storage.
+- DB row is updated.
+- Storefront revalidated.
+
+### Delete
+
+- Product row is removed from DB.
+- All related storage files are removed from bucket.
+
+### Stock
+
+- Inline stock update in dashboard list calls a dedicated action.
+
+---
+
+## 7) Analytics behavior
+
+Current analytics model:
+
+- `view` events are recorded from product detail page render path.
+- Overview page aggregates:
+  - total products
+  - published products
+  - low-stock products
+  - order count
+  - events today
+  - top viewed products chart
+  - recent events table
+
+---
+
+## 8) Storefront DB usage
+
+Storefront product routes now pull from DB:
+
+- home featured products
+- products catalog page
+- product detail + related products
+- cart page product mapping
+- sitemap product URLs
+
+---
+
+## 9) Commands reference
+
+- `pnpm dev` — start dev server
+- `pnpm build` — production build
+- `npx prisma generate` — regenerate client
+- `npx prisma migrate dev --name <name>` — local migration creation/application
+- `npx prisma migrate deploy` — apply migrations in production
+- `npx prisma db seed` — seed DB and attempt storage uploads
+
+---
+
+## 10) Notes and caveats
+
+- Prisma v7 requires `prisma.config.ts`. The CLI uses `datasource.url` only (no `directUrl`); this project sets it to `DIRECT_URL` while the app uses pooled `DATABASE_URL`.
+- Seeding storage uploads requires valid `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`.
+- If storage env vars are missing during seed, image URLs fall back to local paths.
+- `DASHBOARD_PASSWORD` is sensitive; keep it out of client code and public docs.

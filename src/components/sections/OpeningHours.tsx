@@ -1,12 +1,13 @@
 "use client";
 
-import { STORE } from "@/constant";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "../../../middleware";
+import type { OpeningHourRecord } from "@/lib/db/store";
 
 interface OpeningHoursProps {
   dict: Dictionary;
   locale: Locale;
+  openingHours: OpeningHourRecord[];
 }
 
 function msToTime(ms: number): string {
@@ -21,7 +22,7 @@ function isOpenNow(opensAt: number, closesAt: number): boolean {
   return ms >= opensAt && ms < closesAt;
 }
 
-export function OpeningHours({ dict, locale }: OpeningHoursProps) {
+export function OpeningHours({ dict, locale, openingHours }: OpeningHoursProps) {
   const now = new Date();
   const todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
 
@@ -32,9 +33,9 @@ export function OpeningHours({ dict, locale }: OpeningHoursProps) {
       </h3>
 
       <ul className="space-y-3">
-        {STORE.openingHours.map((slot, i) => {
+        {openingHours.map((slot, i) => {
           const isToday = i === todayIndex;
-          const open = isToday && isOpenNow(slot.opensAt as unknown as number, slot.closesAt as unknown as number);
+          const open = isToday && isOpenNow(slot.opensAt, slot.closesAt);
 
           return (
             <li
@@ -46,7 +47,7 @@ export function OpeningHours({ dict, locale }: OpeningHoursProps) {
               <span className="w-28">{slot.label[locale]}</span>
               <span className="flex-1 border-b border-dashed border-[var(--border)]" />
               <span>
-                {msToTime(slot.opensAt as unknown as number)} — {msToTime(slot.closesAt as unknown as number)}
+                {msToTime(slot.opensAt)} — {msToTime(slot.closesAt)}
               </span>
               {isToday && (
                 <span
