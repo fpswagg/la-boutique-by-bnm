@@ -11,6 +11,7 @@ import { SawaboIntegration } from "../../_components/SawaboIntegration";
 import {
   dispatchSawaboWebhookAction,
   quickSawaboPingAction,
+  runSawaboShortcutAction,
   updateSawaboConfigAction,
 } from "./actions";
 
@@ -64,6 +65,7 @@ export default async function SawaboIntegrationPage({
         updateConfigAction={updateSawaboConfigAction.bind(null, token)}
         dispatchAction={dispatchSawaboWebhookAction.bind(null, token)}
         quickPingAction={quickSawaboPingAction.bind(null, token)}
+        runShortcutAction={runSawaboShortcutAction.bind(null, token)}
       />
     </div>
   );

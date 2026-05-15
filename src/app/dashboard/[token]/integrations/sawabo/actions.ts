@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { dashboardFr } from "@/lib/dashboard/fr";
 import {
+  executeSawaboShortcut,
   executeSawaboAction,
   getOrCreateSawaboConfig,
   toSawaboConfigView,
   updateSawaboConfig,
 } from "@/lib/sawabo/service";
+import type { SawaboShortcutKey } from "@/lib/sawabo/service";
 
 function assertToken(token: string) {
   const secret = process.env.DASHBOARD_PASSWORD;
@@ -86,4 +88,20 @@ export async function getSawaboConfigSnapshotAction(token: string) {
   assertToken(token);
   const row = await getOrCreateSawaboConfig();
   return toSawaboConfigView(row);
+}
+
+export async function runSawaboShortcutAction(
+  token: string,
+  shortcut: SawaboShortcutKey,
+  productId?: string,
+) {
+  assertToken(token);
+  const result = await executeSawaboShortcut({ shortcut, productId });
+  revalidateSawabo(token);
+  return {
+    requestId: result.request.requestId,
+    status: result.request.status,
+    reused: result.reused,
+    httpStatus: ("httpStatus" in result ? result.httpStatus : null) ?? null,
+  };
 }

@@ -87,6 +87,13 @@ export const dashboardFr = {
       ping: "Ping",
       getStatus: "État du bot",
       refresh: "Actualiser",
+      postProductNow: "Poster ce produit",
+      postAllProducts: "Poster tous les produits",
+      notifyRestock: "Notifier réassort",
+      refreshGroups: "Mettre à jour les groupes",
+      refreshJobs: "Mettre à jour les tâches",
+      refreshActivity: "Mettre à jour l'activité",
+      prefillQuickJob: "Préremplir job rapide",
     },
     console: {
       lastResult: "Dernière réponse",
@@ -141,6 +148,8 @@ export const dashboardFr = {
     edit: "Modifier",
     delete: "Supprimer",
     duplicate: "Dupliquer",
+    postToSawabo: "Poster",
+    postAllToSawabo: "Poster tout",
     stockIn: "En stock",
     stockOut: "Rupture",
     statusLabels: {
@@ -264,6 +273,7 @@ export const dashboardFr = {
     navigating: "Chargement…",
     clearingAnalytics: "Effacement…",
     sendingWebhook: "Envoi en cours…",
+    postingSawabo: "Publication Sawabo…",
     savingConfig: "Enregistrement…",
   },
   errors: {

@@ -1,10 +1,17 @@
-import { deleteProduct, duplicateProduct, setProductStockFromForm } from "../actions";
+import {
+  deleteProduct,
+  duplicateProduct,
+  postAllProductsToSawaboShortcut,
+  postProductToSawaboShortcut,
+  setProductStockFromForm,
+} from "../actions";
 import { getAllProducts } from "@/lib/db/products";
 import { dashboardFr, productStatusLabelFr } from "@/lib/dashboard/fr";
 import { DashboardNavLink } from "../_components/DashboardNavLink";
 import { DashboardSortLink } from "../_components/DashboardSortLink";
 import { ProductDeleteForm } from "../_components/ProductDeleteForm";
 import { ProductDuplicateForm } from "../_components/ProductDuplicateForm";
+import { ProductSawaboShortcutForm } from "../_components/ProductSawaboShortcutForm";
 import { ProductStockToggle } from "../_components/ProductStockToggle";
 
 export default async function DashboardProductsPage({
@@ -45,12 +52,18 @@ export default async function DashboardProductsPage({
             {dashboardFr.products.title}
           </h2>
         </div>
-        <DashboardNavLink
-          href={`/dashboard/${token}/products/new`}
-          label={dashboardFr.products.newProduct}
-          match="prefix"
-          className="shrink-0 self-start sm:self-auto px-4 py-2 border border-[var(--border)] hover:border-[var(--fg)]"
-        />
+        <div className="flex flex-wrap gap-2">
+          <ProductSawaboShortcutForm
+            action={postAllProductsToSawaboShortcut.bind(null, token)}
+            label={dashboardFr.products.postAllToSawabo}
+          />
+          <DashboardNavLink
+            href={`/dashboard/${token}/products/new`}
+            label={dashboardFr.products.newProduct}
+            match="prefix"
+            className="shrink-0 self-start sm:self-auto px-4 py-2 border border-[var(--border)] hover:border-[var(--fg)]"
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs uppercase tracking-widest">
@@ -107,6 +120,10 @@ export default async function DashboardProductsPage({
                       label={dashboardFr.products.edit}
                       match="prefix"
                       className="px-2 py-1 border border-[var(--border)] hover:border-[var(--fg)] text-xs"
+                    />
+                    <ProductSawaboShortcutForm
+                      action={postProductToSawaboShortcut.bind(null, token, product.id)}
+                      label={dashboardFr.products.postToSawabo}
                     />
                     <ProductDuplicateForm action={duplicateProduct.bind(null, token, product.id)} />
                     <ProductDeleteForm action={deleteProduct.bind(null, token, product.id)} />

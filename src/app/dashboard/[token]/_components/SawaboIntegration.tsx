@@ -11,6 +11,15 @@ import { DashboardForm } from "./DashboardForm";
 import { DashboardSubmitButton } from "./DashboardSubmitButton";
 
 type TabId = "console" | "sessions" | "groups" | "jobs" | "activity";
+type ShortcutKey =
+  | "post_product_now"
+  | "post_all_products"
+  | "notify_restock"
+  | "refresh_groups"
+  | "refresh_jobs"
+  | "refresh_activity"
+  | "ping"
+  | "get_status";
 
 type ConfigView = {
   sessionKey: string;
@@ -68,6 +77,10 @@ type Props = {
     body?: unknown;
   }>;
   quickPingAction: () => Promise<{ requestId: string; status: string }>;
+  runShortcutAction: (
+    shortcut: ShortcutKey,
+    productId?: string,
+  ) => Promise<{ requestId: string; status: string; reused: boolean; httpStatus: number | null }>;
 };
 
 const TAB_ACTIONS: Record<TabId, SawaboWebhookAction[]> = {
@@ -95,6 +108,7 @@ export function SawaboIntegration({
   updateConfigAction,
   dispatchAction,
   quickPingAction,
+  runShortcutAction,
 }: Props) {
   const [tab, setTab] = useState<TabId>("console");
   const [action, setAction] = useState<SawaboWebhookAction>("ping");
@@ -103,6 +117,7 @@ export function SawaboIntegration({
   );
   const [lastResult, setLastResult] = useState<string | null>(null);
   const [isPinging, startPing] = useTransition();
+  const [isShortcutPending, startShortcut] = useTransition();
 
   const tabActions = TAB_ACTIONS[tab];
 
@@ -146,6 +161,13 @@ export function SawaboIntegration({
     ],
     [],
   );
+
+  const runShortcut = (shortcut: ShortcutKey, productId?: string) => {
+    startShortcut(async () => {
+      const result = await runShortcutAction(shortcut, productId);
+      setLastResult(JSON.stringify({ shortcut, productId, ...result }, null, 2));
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -194,6 +216,14 @@ export function SawaboIntegration({
                 className="border border-[var(--border)] px-3 py-2 text-xs uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
               >
                 {dashboardFr.sawabo.actions.ping}
+              </button>
+              <button
+                type="button"
+                disabled={isShortcutPending}
+                onClick={() => runShortcut("get_status")}
+                className="border border-[var(--border)] px-3 py-2 text-xs uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+              >
+                {dashboardFr.sawabo.actions.getStatus}
               </button>
             </div>
           </div>
@@ -335,16 +365,91 @@ export function SawaboIntegration({
             <div className="space-y-2">
               <p className="text-xs text-[var(--muted)]">{dashboardFr.sawabo.groups.productsHint}</p>
               <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={isShortcutPending}
+                  onClick={() => runShortcut("post_all_products")}
+                  className="border border-[var(--border)] px-2 py-1 text-xs hover:border-[var(--fg)] disabled:opacity-50"
+                >
+                  {dashboardFr.sawabo.actions.postAllProducts}
+                </button>
+                <button
+                  type="button"
+                  disabled={isShortcutPending}
+                  onClick={() => runShortcut("refresh_groups")}
+                  className="border border-[var(--border)] px-2 py-1 text-xs hover:border-[var(--fg)] disabled:opacity-50"
+                >
+                  {dashboardFr.sawabo.actions.refreshGroups}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 {products.slice(0, 12).map((product) => (
-                  <button
+                  <div
                     key={product.id}
-                    type="button"
-                    onClick={() => bindProduct(product.id)}
-                    className="border border-[var(--border)] px-2 py-1 text-xs hover:border-[var(--fg)]"
+                    className="border border-[var(--border)] px-2 py-1 text-xs flex items-center gap-2"
                   >
-                    {product.nameFr}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => bindProduct(product.id)}
+                      className="hover:text-[var(--fg)]"
+                    >
+                      {product.nameFr}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isShortcutPending}
+                      onClick={() => runShortcut("post_product_now", product.id)}
+                      className="border border-[var(--border)] px-1.5 py-0.5 uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+                    >
+                      {dashboardFr.sawabo.actions.postProductNow}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isShortcutPending}
+                      onClick={() => runShortcut("notify_restock", product.id)}
+                      className="border border-[var(--border)] px-1.5 py-0.5 uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+                    >
+                      {dashboardFr.sawabo.actions.notifyRestock}
+                    </button>
+                  </div>
                 ))}
+              </div>
+            </div>
+          ) : null}
+
+          {tab === "jobs" ? (
+            <div className="space-y-2">
+              <p className="text-xs text-[var(--muted)]">{dashboardFr.sawabo.jobs.hint}</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={isShortcutPending}
+                  onClick={() => runShortcut("refresh_jobs")}
+                  className="border border-[var(--border)] px-2 py-1 text-xs uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+                >
+                  {dashboardFr.sawabo.actions.refreshJobs}
+                </button>
+                <button
+                  type="button"
+                  disabled={isShortcutPending}
+                  onClick={() => {
+                    onActionChange("create_job");
+                    setPayload(
+                      JSON.stringify(
+                        {
+                          kind: "POST_NOW",
+                          groupIds: config.defaultGroupIds,
+                          productIds: products.slice(0, 3).map((p) => p.id),
+                        },
+                        null,
+                        2,
+                      ),
+                    );
+                  }}
+                  className="border border-[var(--border)] px-2 py-1 text-xs uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+                >
+                  {dashboardFr.sawabo.actions.prefillQuickJob}
+                </button>
               </div>
             </div>
           ) : null}
@@ -481,20 +586,24 @@ export function SawaboIntegration({
             </div>
           </div>
 
-          <DashboardForm
-            action={async (formData) => {
-              formData.set("action", "get_activity");
-              formData.set("payload", JSON.stringify({ limit: 50 }));
-              const res = await dispatchAction(formData);
-              setLastResult(JSON.stringify(res, null, 2));
-            }}
-            className="border border-[var(--border)] p-4"
-          >
-            <DashboardSubmitButton
-              label={`${dashboardFr.sawabo.actions.refresh} (get_activity)`}
-              pendingLabel={dashboardFr.loading.sendingWebhook}
-            />
-          </DashboardForm>
+          <div className="border border-[var(--border)] p-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={isShortcutPending}
+              onClick={() => runShortcut("refresh_activity")}
+              className="border border-[var(--border)] px-3 py-2 text-xs uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+            >
+              {dashboardFr.sawabo.actions.refreshActivity}
+            </button>
+            <button
+              type="button"
+              disabled={isShortcutPending}
+              onClick={() => runShortcut("refresh_jobs")}
+              className="border border-[var(--border)] px-3 py-2 text-xs uppercase tracking-wider hover:border-[var(--fg)] disabled:opacity-50"
+            >
+              {dashboardFr.sawabo.actions.refreshJobs}
+            </button>
+          </div>
         </section>
       ) : null}
 

@@ -12,6 +12,7 @@ import {
 } from "@/lib/supabase";
 import { clearAllAnalytics } from "@/lib/db/analytics";
 import { updateStoreConfig, type OpeningHourRecord, type StoreConfigRecord } from "@/lib/db/store";
+import { executeSawaboShortcut } from "@/lib/sawabo/service";
 
 function assertToken(token: string) {
   const secret = process.env.DASHBOARD_PASSWORD;
@@ -409,4 +410,18 @@ export async function updateStoreConfigAction(token: string, formData: FormData)
 
   await updateStoreConfig({ config, openingHours });
   revalidateStorefront();
+}
+
+export async function postProductToSawaboShortcut(token: string, productId: string) {
+  assertToken(token);
+  await executeSawaboShortcut({ shortcut: "post_product_now", productId });
+  revalidatePath(`/dashboard/${token}/products`);
+  revalidatePath(`/dashboard/${token}/integrations/sawabo`);
+}
+
+export async function postAllProductsToSawaboShortcut(token: string) {
+  assertToken(token);
+  await executeSawaboShortcut({ shortcut: "post_all_products" });
+  revalidatePath(`/dashboard/${token}/products`);
+  revalidatePath(`/dashboard/${token}/integrations/sawabo`);
 }

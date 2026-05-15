@@ -407,4 +407,127 @@ export async function getPublishedProductsForSawabo() {
   });
 }
 
+export type SawaboShortcutKey =
+  | "post_product_now"
+  | "post_all_products"
+  | "notify_restock"
+  | "refresh_groups"
+  | "refresh_jobs"
+  | "refresh_activity"
+  | "ping"
+  | "get_status";
+
+function makeShortcutRequestId(shortcut: SawaboShortcutKey, suffix = ""): string {
+  const minuteBucket = Math.floor(Date.now() / 60000);
+  const safeSuffix = suffix ? `_${suffix.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 40)}` : "";
+  return `shortcut_${shortcut}_${minuteBucket}${safeSuffix}`;
+}
+
+export async function executeSawaboShortcut(input: {
+  shortcut: SawaboShortcutKey;
+  productId?: string;
+}) {
+  const config = await getOrCreateSawaboConfig();
+  const defaultGroupIds = config.defaultGroupIds;
+
+  if (input.shortcut === "ping") {
+    return executeSawaboAction({
+      action: "ping",
+      data: {},
+      idempotencyKey: makeShortcutRequestId("ping"),
+    });
+  }
+
+  if (input.shortcut === "get_status") {
+    return executeSawaboAction({
+      action: "get_status",
+      data: {},
+      idempotencyKey: makeShortcutRequestId("get_status"),
+    });
+  }
+
+  if (input.shortcut === "refresh_groups") {
+    return executeSawaboAction({
+      action: "get_groups",
+      data: { includeMembers: false },
+      idempotencyKey: makeShortcutRequestId("refresh_groups"),
+    });
+  }
+
+  if (input.shortcut === "refresh_jobs") {
+    return executeSawaboAction({
+      action: "get_jobs",
+      data: { limit: 50 },
+      idempotencyKey: makeShortcutRequestId("refresh_jobs"),
+    });
+  }
+
+  if (input.shortcut === "refresh_activity") {
+    return executeSawaboAction({
+      action: "get_activity",
+      data: { limit: 50 },
+      idempotencyKey: makeShortcutRequestId("refresh_activity"),
+    });
+  }
+
+  if (input.shortcut === "post_all_products") {
+    const products = await getPublishedProductsForSawabo();
+    const productIds = products.map((p) => p.id);
+    if (productIds.length === 0) {
+      throw new Error("Aucun produit publié à poster.");
+    }
+    return executeSawaboAction({
+      action: "post_products",
+      data: { productIds, groupIds: defaultGroupIds },
+      idempotencyKey: makeShortcutRequestId("post_all_products"),
+    });
+  }
+
+  if (!input.productId) {
+    throw new Error("productId requis pour ce raccourci.");
+  }
+
+  const product = await db.product.findUnique({
+    where: { id: input.productId },
+    select: {
+      id: true,
+      nameFr: true,
+      stock: true,
+      status: true,
+    },
+  });
+  if (!product || product.status !== "published") {
+    throw new Error("Produit introuvable ou non publié.");
+  }
+
+  if (input.shortcut === "post_product_now") {
+    return executeSawaboAction({
+      action: "post_product",
+      data: {
+        productId: product.id,
+        groupIds: defaultGroupIds,
+        attachProductUrl: true,
+      },
+      idempotencyKey: makeShortcutRequestId("post_product_now", product.id),
+    });
+  }
+
+  if (input.shortcut === "notify_restock") {
+    if (product.stock <= 0) {
+      throw new Error("Le produit est en rupture, réassort impossible.");
+    }
+    return executeSawaboAction({
+      action: "notify_restock",
+      data: {
+        productId: product.id,
+        productName: product.nameFr,
+        groupIds: defaultGroupIds,
+      },
+      idempotencyKey: makeShortcutRequestId("notify_restock", product.id),
+    });
+  }
+
+  throw new Error(`Raccourci inconnu: ${input.shortcut}`);
+}
+
 export type { SawaboWebhookAction };
