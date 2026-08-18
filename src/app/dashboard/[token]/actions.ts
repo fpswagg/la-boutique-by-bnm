@@ -6,13 +6,12 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { dashboardFr } from "@/lib/dashboard/fr";
 import {
-  SUPABASE_STORAGE_BUCKET,
+  deleteStorageFiles,
   getStoragePathFromPublicUrl,
-  supabaseAdmin,
-} from "@/lib/supabase";
+  uploadStorageFile,
+} from "@/lib/sastorage";
 import { clearAllAnalytics } from "@/lib/db/analytics";
 import { updateStoreConfig, type OpeningHourRecord, type StoreConfigRecord } from "@/lib/db/store";
-import { executeSawaboShortcut } from "@/lib/sawabo/service";
 
 function assertToken(token: string) {
   const secret = process.env.DASHBOARD_PASSWORD;
@@ -60,21 +59,18 @@ async function uploadFiles(productId: string, files: File[]): Promise<string[]> 
     const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const objectPath = `products/${productId}/${safeName}`;
 
-    const { error } = await supabaseAdmin.storage
-      .from(SUPABASE_STORAGE_BUCKET)
-      .upload(objectPath, buffer, {
-        upsert: false,
+    try {
+      const publicUrl = await uploadStorageFile({
+        key: objectPath,
+        body: buffer,
         contentType: file.type || "application/octet-stream",
+        fileName: safeName,
       });
-
-    if (error) {
-      throw new Error(`${dashboardFr.errors.uploadFailed}: ${error.message}`);
+      uploaded.push(publicUrl);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "upload failed";
+      throw new Error(`${dashboardFr.errors.uploadFailed}: ${message}`);
     }
-
-    const { data } = supabaseAdmin.storage
-      .from(SUPABASE_STORAGE_BUCKET)
-      .getPublicUrl(objectPath);
-    uploaded.push(data.publicUrl);
   }
 
   return uploaded;
@@ -110,19 +106,18 @@ async function copyProductImagesToNewFolder(newProductId: string, sourceUrls: st
     const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const objectPath = `products/${newProductId}/${safeName}`;
 
-    const { error } = await supabaseAdmin.storage
-      .from(SUPABASE_STORAGE_BUCKET)
-      .upload(objectPath, buffer, {
-        upsert: false,
+    try {
+      const publicUrl = await uploadStorageFile({
+        key: objectPath,
+        body: buffer,
         contentType: contentType || "application/octet-stream",
+        fileName: safeName,
       });
-
-    if (error) {
-      throw new Error(`${dashboardFr.errors.imageCopyFailed}: ${error.message}`);
+      uploaded.push(publicUrl);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "copy failed";
+      throw new Error(`${dashboardFr.errors.imageCopyFailed}: ${message}`);
     }
-
-    const { data } = supabaseAdmin.storage.from(SUPABASE_STORAGE_BUCKET).getPublicUrl(objectPath);
-    uploaded.push(data.publicUrl);
   }
 
   return uploaded;
@@ -135,13 +130,7 @@ async function deleteStorageUrls(urls: string[]) {
 
   if (!paths.length) return;
 
-  const { error } = await supabaseAdmin.storage
-    .from(SUPABASE_STORAGE_BUCKET)
-    .remove(paths);
-
-  if (error) {
-    console.warn("Impossible de supprimer certains fichiers de stockage :", error.message);
-  }
+  await deleteStorageFiles(paths);
 }
 
 function revalidateStorefront() {
@@ -410,18 +399,4 @@ export async function updateStoreConfigAction(token: string, formData: FormData)
 
   await updateStoreConfig({ config, openingHours });
   revalidateStorefront();
-}
-
-export async function postProductToSawaboShortcut(token: string, productId: string) {
-  assertToken(token);
-  await executeSawaboShortcut({ shortcut: "post_product_now", productId });
-  revalidatePath(`/dashboard/${token}/products`);
-  revalidatePath(`/dashboard/${token}/integrations/sawabo`);
-}
-
-export async function postAllProductsToSawaboShortcut(token: string) {
-  assertToken(token);
-  await executeSawaboShortcut({ shortcut: "post_all_products" });
-  revalidatePath(`/dashboard/${token}/products`);
-  revalidatePath(`/dashboard/${token}/integrations/sawabo`);
 }

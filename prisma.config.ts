@@ -7,7 +7,7 @@ export default defineConfig({
     path: "prisma/migrations",
     seed: "tsx prisma/seed.ts",
   },
-  // v7: no directUrl here — CLI/migrations use this URL; use the direct TCP URL (not PgBouncer).
+  // v7: no directUrl here — CLI/migrations use this URL (plain PostgreSQL TCP, not a pooler).
   datasource: {
     url: env("DIRECT_URL"),
   },

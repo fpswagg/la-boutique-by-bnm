@@ -25,11 +25,6 @@ export default function DashboardLayout({
       match: "prefix" as const,
     },
     { href: `/dashboard/${token}/store`, label: dashboardFr.nav.storeConfig, match: "prefix" as const },
-    {
-      href: `/dashboard/${token}/integrations/sawabo`,
-      label: dashboardFr.nav.integrations,
-      match: "prefix" as const,
-    },
   ];
 
   return (

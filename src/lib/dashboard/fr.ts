@@ -5,8 +5,6 @@ export const dashboardFr = {
     products: "Produits",
     createProduct: "Nouveau produit",
     storeConfig: "Configuration boutique",
-    integrations: "Intégrations",
-    sawabo: "Sawabo",
     brand: "La Boutique",
   },
   overview: {
@@ -50,81 +48,6 @@ export const dashboardFr = {
     groupedEvents: "Répartition des interactions",
     count: "Nombre",
   },
-  sawabo: {
-    accent: "intégrations",
-    title: "Sawabo",
-    subtitle: "Console webhook signée vers le bot Sawabo",
-    tabs: {
-      console: "Console",
-      sessions: "Sessions",
-      groups: "Groupes & publication",
-      jobs: "Tâches",
-      activity: "Activité & callbacks",
-    },
-    status: {
-      pending: "En attente",
-      accepted: "Accepté (async)",
-      done: "Terminé",
-      failed: "Échec",
-    },
-    fields: {
-      action: "Action",
-      requestId: "ID de requête",
-      payload: "Données (JSON)",
-      sessionKey: "Clé de session",
-      botBaseUrl: "URL du bot",
-      webhookSecret: "Secret webhook",
-      callbackUrl: "URL de callback",
-      callbackSecret: "Secret callback",
-      enabled: "Intégration active",
-      maxRequestsPerHour: "Limite / heure",
-      defaultGroupIds: "Groupes par défaut (IDs, virgules)",
-      allowedActions: "Actions autorisées (vide = toutes)",
-    },
-    actions: {
-      send: "Envoyer la requête",
-      saveConfig: "Enregistrer la configuration",
-      ping: "Ping",
-      getStatus: "État du bot",
-      refresh: "Actualiser",
-      postProductNow: "Poster ce produit",
-      postAllProducts: "Poster tous les produits",
-      notifyRestock: "Notifier réassort",
-      refreshGroups: "Mettre à jour les groupes",
-      refreshJobs: "Mettre à jour les tâches",
-      refreshActivity: "Mettre à jour l'activité",
-      prefillQuickJob: "Préremplir job rapide",
-    },
-    console: {
-      lastResult: "Dernière réponse",
-      httpStatus: "Code HTTP",
-    },
-    sessions: {
-      connectivity: "Connectivité",
-      config: "Configuration webhook",
-    },
-    groups: {
-      productsHint: "Produits publiés disponibles pour post_product / post_products",
-      pickProduct: "Choisir un produit",
-    },
-    jobs: {
-      hint: "Actions create_job, pause_job, resume_job, run_job_now, cancel_job",
-    },
-    activity: {
-      requests: "Requêtes récentes",
-      callbacks: "Callbacks reçus",
-      statsTitle: "Statistiques opérationnelles",
-      successRate: "Taux de succès",
-      pending: "En cours",
-      failures: "Échecs",
-      byAction: "Par action",
-    },
-    empty: "Aucune donnée pour le moment.",
-    errors: {
-      invalidJson: "JSON invalide.",
-      dispatchFailed: "Échec de l'envoi webhook.",
-    },
-  },
   products: {
     accent: "catalogue",
     title: "Produits",
@@ -148,8 +71,6 @@ export const dashboardFr = {
     edit: "Modifier",
     delete: "Supprimer",
     duplicate: "Dupliquer",
-    postToSawabo: "Poster",
-    postAllToSawabo: "Poster tout",
     stockIn: "En stock",
     stockOut: "Rupture",
     statusLabels: {
@@ -272,8 +193,6 @@ export const dashboardFr = {
     deletingImage: "Suppression de l'image…",
     navigating: "Chargement…",
     clearingAnalytics: "Effacement…",
-    sendingWebhook: "Envoi en cours…",
-    postingSawabo: "Publication Sawabo…",
     savingConfig: "Enregistrement…",
   },
   errors: {
@@ -306,11 +225,6 @@ export function analyticsEventLabelFr(event: string): string {
 export function productStatusLabelFr(status: string): string {
   const key = status as keyof typeof dashboardFr.products.statusLabels;
   return dashboardFr.products.statusLabels[key] ?? status;
-}
-
-export function sawaboStatusLabelFr(status: string): string {
-  const key = status as keyof typeof dashboardFr.sawabo.status;
-  return dashboardFr.sawabo.status[key] ?? status;
 }
 
 export function localeLabelFr(locale: string | null | undefined): string {

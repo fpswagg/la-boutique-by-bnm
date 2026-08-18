@@ -11,11 +11,10 @@ function createPrismaClient(): PrismaClient {
     throw new Error("Missing DATABASE_URL environment variable.");
   }
 
-  // Single connection per Node isolate. Default pg Pool (max ~10) plus parallel
-  // `next build` static generation exhausts Supabase session pooler (EMAXCONNSESSION).
+  const poolMax = Number(process.env.PG_POOL_MAX ?? 5);
   const adapter = new PrismaPg({
     connectionString,
-    max: 1,
+    max: Number.isFinite(poolMax) && poolMax > 0 ? poolMax : 5,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000,
   });

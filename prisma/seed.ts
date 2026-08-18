@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { PrismaClient, ProductStatus } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { createClient } from "@supabase/supabase-js";
+import { isSaStorageConfigured, uploadStorageFile } from "../src/lib/sastorage";
 
 type LocaleField = { fr: string; en: string; tr: string };
 type ProductSeed = {
@@ -41,17 +41,6 @@ if (!databaseUrl) {
 const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "product-images";
-
-const supabase =
-  supabaseUrl && serviceRoleKey
-    ? createClient(supabaseUrl, serviceRoleKey, {
-        auth: { autoRefreshToken: false, persistSession: false },
-      })
-    : null;
-
 async function readSeedJson<T>(filePath: string): Promise<T> {
   const raw = await readFile(filePath, "utf8");
   return JSON.parse(raw) as T;
@@ -71,23 +60,15 @@ async function uploadImageIfAvailable(localRelativePath: string) {
 
   try {
     const bytes = await readFile(absolute);
-    if (!supabase) return localRelativePath;
-
     const remotePath = normalized;
-    const upload = await supabase.storage
-      .from(bucket)
-      .upload(remotePath, bytes, {
-        upsert: true,
-        contentType: getContentTypeFromExt(remotePath),
-      });
+    if (!isSaStorageConfigured()) return localRelativePath;
 
-    if (upload.error) {
-      console.warn(`Upload failed for ${localRelativePath}: ${upload.error.message}`);
-      return localRelativePath;
-    }
-
-    const { data } = supabase.storage.from(bucket).getPublicUrl(remotePath);
-    return data.publicUrl || localRelativePath;
+    return await uploadStorageFile({
+      key: remotePath,
+      body: bytes,
+      contentType: getContentTypeFromExt(remotePath),
+      fileName: path.basename(remotePath),
+    });
   } catch {
     return localRelativePath;
   }
