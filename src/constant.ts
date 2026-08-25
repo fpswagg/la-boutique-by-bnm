@@ -24,7 +24,7 @@ export const STORE = {
     },
   },
   email: "henryemmanuel@gmail.com",
-  phone: "+237 6 70 02 18 26",
+  phone: "+237 6 55 62 69 52",
   openingHours: [
     {
       day: "monday",
