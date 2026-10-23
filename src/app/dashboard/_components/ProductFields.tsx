@@ -1,5 +1,6 @@
 import type { ProductRecord } from "@/lib/sss";
 import { dashboardFr } from "@/lib/dashboard/fr";
+import { TranslateButton } from "./TranslateButton";
 import { DashboardSelect, DashboardTextarea, DashboardTextField } from "./FormFields";
 
 const f = dashboardFr.productForm.fields;
@@ -41,6 +42,7 @@ export function ProductFields({ product, categories }: { product?: ProductRecord
       </Section>
 
       <Section title={dashboardFr.productForm.sections.translations}>
+        <TranslateButton />
         <div className="grid md:grid-cols-3 gap-4">
           <DashboardTextField label={f.nameFr} name="nameFr" defaultValue={product?.name.fr} />
           <DashboardTextField label={f.nameEn} name="nameEn" required={false} defaultValue={product?.name.en} hint={f.translationHint} />

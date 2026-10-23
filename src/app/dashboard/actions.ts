@@ -354,3 +354,16 @@ export async function updateStoreConfigAction(formData: FormData) {
   refreshShop();
   redirect("/dashboard/store?saved=1");
 }
+
+/** "Traduire" button: the French name, category and description in English and Turkish. */
+export async function translateProductAction(input: { name: string; category: string; description: string }) {
+  await actionDash();
+  const { translateFromFrench } = await import("@/lib/translate");
+  const src = [input.name, input.category, input.description].map((s) => String(s ?? "").slice(0, 2000));
+  try {
+    const [en, tr] = await Promise.all([translateFromFrench(src, "en"), translateFromFrench(src, "tr")]);
+    return { ok: true as const, en: { name: en[0], category: en[1], description: en[2] }, tr: { name: tr[0], category: tr[1], description: tr[2] } };
+  } catch (err) {
+    return { ok: false as const, error: err instanceof Error ? err.message : "Traduction impossible." };
+  }
+}
