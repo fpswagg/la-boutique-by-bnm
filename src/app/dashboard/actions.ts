@@ -149,6 +149,8 @@ async function productBody(ctx: DashContext, input: FormProduct, previous: Raw) 
     price: input.price ?? 0,
     currency: input.currency,
     quantity: input.stock,
+    // Owner rule: every product in stock is unlimited; 0 = out of stock.
+    unlimitedStock: input.stock > 0,
     description: input.description.fr,
     category: input.category.fr,
     ...(catId ? { categoryIds: [catId] } : {}),
@@ -210,6 +212,7 @@ export async function duplicateProduct(id: string) {
         price: Number(src.price) || 0,
         currency: str(src.currency) || "FCFA",
         quantity: Number(src.quantity) || 0,
+        unlimitedStock: src.unlimitedStock === true,
         description: str(src.description),
         category: str(src.category),
         categoryIds: arr(src.categoryIds).filter((v): v is string => typeof v === "string"),
@@ -241,7 +244,7 @@ export async function setProductStockFromForm(id: string, formData: FormData) {
   let quantity = 0;
   if (wanted > 0) quantity = Math.max(1, Number(meta.lastStock) || Number(current.quantity) || 1);
   else if ((Number(current.quantity) || 0) > 0) meta.lastStock = Number(current.quantity);
-  await api(ctx, `/products/${encodeURIComponent(id)}`, { method: "PATCH", ...json({ quantity, metadata: meta }) });
+  await api(ctx, `/products/${encodeURIComponent(id)}`, { method: "PATCH", ...json({ quantity, unlimitedStock: wanted > 0, metadata: meta }) });
   refreshShop();
   revalidatePath("/dashboard/products");
 }
