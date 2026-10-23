@@ -1,159 +1,29 @@
-# La Boutique by BNM — Developer Guide
+# La Boutique by BNM
 
-This project runs with **Prisma + PostgreSQL** and **SA Storage**:
+Showcase and shop site (Next.js 14, FR / EN / TR) for La Boutique by BNM, Yaoundé.
 
-- **Storefront reads from DB** (not from `data/products.json` directly).
-- **Admin dashboard lives at a secret URL** (`/dashboard/<DASHBOARD_PASSWORD>`).
-- **Images are uploaded as files** to [SA Storage](https://sastorage.fpswagg.site) and old images are cleaned up when removed.
+**No database and no storage of its own: everything lives in [SSS](https://sss.fpswagg.site).**
 
----
+- **Catalogue, business info and opening hours**: read from SSS with the business API key (`SSS_API_KEY`) and cached for `SSS_REVALIDATE` seconds. Translations live in each product's `metadata.i18n.{en,tr}`. The product URL id is the SSS `sku`.
+- **Cart orders**: created in SSS (Sasto `order`), visible in the SSS app and in the dashboard. They are also sent on WhatsApp.
+- **Views**: counted in the product metadata (`views`, `daily`).
+- **Images**: stored in SSS files (SA Storage behind it).
 
-## 1) Quick setup
+## Dashboard: `/dashboard`
 
-1. Copy `.env.example` to `.env.local`.
-2. Fill all variables.
-3. Run installs and Prisma:
-   - `pnpm install`
-   - `npx prisma generate`
-   - `npx prisma migrate deploy` (or `npx prisma migrate dev` locally)
-   - `npx prisma db seed`
-4. Start app: `pnpm dev`
+Sign in with SSS (OAuth + PKCE). Only members of this business get in, with the rights their role gives in SSS (`business:read` = read-only).
 
----
+- Overview: views (today / week / month), low stock, pending orders.
+- Orders: filter by status, change status (delivered = fulfilled in SSS, with invoice), WhatsApp the customer.
+- Products: create, edit (FR/EN/TR, badge, featured, order, tags), duplicate, delete, stock, images.
+- Business: contact details, descriptions, delivery, opening hours (same profile as SSS).
 
-## 2) Required environment variables
+Saving refreshes the public site at once.
 
-Defined in `.env.example`:
+## Setup
 
-- `DATABASE_URL` (PostgreSQL URL used by the Next.js app and `prisma/seed.ts`)
-- `DIRECT_URL` (PostgreSQL URL used as `datasource.url` in `prisma.config.ts` for Prisma CLI / migrations — v7 removed `directUrl` from config)
-- `SA_STORAGE_URL` (default: `https://sastorage.fpswagg.site`)
-- `SA_STORAGE_TOKEN` (Bearer token `sa_…` from SA Storage dashboard → API tokens; needs `files:write` and `files:delete`)
-- `DASHBOARD_PASSWORD` (secret path token)
+1. `pnpm install`
+2. Copy `.env.example` to `.env.local` and fill it in. You need an SSS API key and an OAuth app of the business, with redirect `SITE_URL/auth/sss/callback`.
+3. `pnpm dev`
 
----
-
-## 3) Dashboard access (no visible button)
-
-The dashboard is intentionally hidden from public navigation.
-
-- Access pattern: `/dashboard/<DASHBOARD_PASSWORD>`
-- Example: `/dashboard/my-very-secret-token`
-- Wrong token returns a 404-style response.
-
-Main pages:
-
-- `/dashboard/<token>` → overview + analytics
-- `/dashboard/<token>/products` → product CRUD and stock updates
-- `/dashboard/<token>/products/new` → create product with file uploads
-- `/dashboard/<token>/products/<id>` → edit product, delete image, add images
-- `/dashboard/<token>/store` → update store profile and opening hours
-
----
-
-## 4) Data source of truth
-
-### Runtime source
-
-- Products, stock, analytics, store config, opening hours: **PostgreSQL**
-- Product images: **SA Storage** (`https://sastorage.fpswagg.site/files/...`)
-
-### Seed/bootstrap source
-
-- `data/products.json`
-- `src/constant.ts`
-- `public/products/*`
-
-These files are used by `prisma/seed.ts` to initialize DB/storage. After seeding, storefront uses DB data.
-
----
-
-## 5) File map (important backend files)
-
-| Purpose | File |
-| --- | --- |
-| Prisma schema | `prisma/schema.prisma` |
-| Prisma config (v7) | `prisma.config.ts` |
-| Seed script | `prisma/seed.ts` |
-| Prisma singleton | `src/lib/db.ts` |
-| SA Storage client | `src/lib/sastorage.ts` |
-| DB product helpers | `src/lib/db/products.ts` |
-| DB store helpers | `src/lib/db/store.ts` |
-| DB analytics helpers | `src/lib/db/analytics.ts` |
-| Dashboard actions | `src/app/dashboard/[token]/actions.ts` |
-
----
-
-## 6) How product CRUD works
-
-### Create
-
-- Form sends translatable fields (`fr/en/tr`), price, stock, status, tags, files.
-- Server action uploads files to SA Storage (`POST /api/files`).
-- Public URLs (`/files/{key}`) are saved in DB `Product.images`.
-- Storefront pages are revalidated.
-
-### Update
-
-- Existing image URLs are kept through hidden fields.
-- New files are uploaded and merged.
-- Removed old URLs are deleted from SA Storage.
-- DB row is updated.
-- Storefront revalidated.
-
-### Delete
-
-- Product row is removed from DB.
-- All related storage files are removed from SA Storage.
-
-### Stock
-
-- Inline stock update in dashboard list calls a dedicated action.
-
----
-
-## 7) Analytics behavior
-
-Current analytics model:
-
-- `view` events are recorded from product detail page render path.
-- Overview page aggregates:
-  - total products
-  - published products
-  - low-stock products
-  - order count
-  - events today
-  - top viewed products chart
-  - recent events table
-
----
-
-## 8) Storefront DB usage
-
-Storefront product routes now pull from DB:
-
-- home featured products
-- products catalog page
-- product detail + related products
-- cart page product mapping
-- sitemap product URLs
-
----
-
-## 9) Commands reference
-
-- `pnpm dev` — start dev server
-- `pnpm build` — production build
-- `npx prisma generate` — regenerate client
-- `npx prisma migrate dev --name <name>` — local migration creation/application
-- `npx prisma migrate deploy` — apply migrations in production
-- `npx prisma db seed` — seed DB and attempt storage uploads
-
----
-
-## 10) Notes and caveats
-
-- Prisma v7 requires `prisma.config.ts`. The CLI uses `datasource.url` only (no `directUrl`); this project sets it to `DIRECT_URL` while the app uses `DATABASE_URL`.
-- Seeding storage uploads requires a valid `SA_STORAGE_TOKEN`.
-- If storage env vars are missing during seed, image URLs fall back to local paths.
-- `DASHBOARD_PASSWORD` is sensitive; keep it out of client code and public docs.
+`POST /api/revalidate` (header `x-revalidate-secret: REVALIDATE_SECRET`) refreshes the cache, e.g. from an SSS webhook.

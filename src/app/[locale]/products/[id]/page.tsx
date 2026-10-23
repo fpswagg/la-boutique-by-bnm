@@ -6,11 +6,11 @@ import { getDictionary } from "@/lib/i18n";
 import { getProductName, formatPrice } from "@/lib/products";
 import {
   getAllProducts,
+  getDeliveryText,
   getProductById,
   getRelatedProducts,
-  incrementProductViews,
-} from "@/lib/db/products";
-import { recordEvent } from "@/lib/db/analytics";
+} from "@/lib/sss";
+import { ViewBeacon } from "@/components/ui/ViewBeacon";
 import { ImageGallery } from "@/components/ui/ImageGallery";
 import { LikeButton } from "@/components/ui/LikeButton";
 import { CartButton } from "@/components/ui/CartButton";
@@ -19,7 +19,7 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import type { Locale } from "../../../../../middleware";
 
 export async function generateStaticParams() {
-  const products = await getAllProducts({ includeArchived: true });
+  const products = await getAllProducts();
   return products.map((p) => ({ id: p.id }));
 }
 
@@ -34,9 +34,9 @@ export async function generateMetadata({
   const name = getProductName(product, params.locale);
   return {
     title: name,
-    description: product.price
+    description: product.description[params.locale] || (product.price !== null
       ? `${name} — ${formatPrice(product.price, product.currency)}`
-      : `${name} — ${dict.product.price_on_request}`,
+      : `${name} — ${dict.product.price_on_request}`),
     openGraph: {
       images: product.images[0] ? [product.images[0]] : [],
     },
@@ -52,21 +52,22 @@ export default async function ProductPage({
   const product = await getProductById(id);
   if (!product) notFound();
 
-  await Promise.all([
-    incrementProductViews(id),
-    recordEvent({ event: "view", productId: id, locale }),
-  ]);
-
   const dict = getDictionary(locale);
   const name = getProductName(product, locale);
   const category = product.category[locale] ?? product.category.fr;
   const priceStr = product.price !== null
     ? formatPrice(product.price, product.currency)
     : null;
-  const related = (await getRelatedProducts(product.id, locale)).slice(0, 4);
+  const [relatedAll, delivery] = await Promise.all([
+    getRelatedProducts(product.id, locale),
+    getDeliveryText(),
+  ]);
+  const related = relatedAll.slice(0, 4);
+  const description = product.description[locale] || product.description.fr;
 
   return (
     <div className="pt-24">
+      <ViewBeacon productId={product.id} locale={locale} />
       <div className="mx-auto max-w-7xl px-6 py-10">
         {/* Back */}
         <Link
@@ -94,6 +95,12 @@ export default async function ProductPage({
               {name}
             </h1>
 
+            {product.badge ? (
+              <p className="inline-flex self-start text-[10px] font-medium tracking-widest uppercase px-2 py-1 bg-[var(--fg)] text-[var(--bg)] mb-6">
+                {product.badge}
+              </p>
+            ) : null}
+
             {/* Price */}
             {priceStr ? (
               <p className="text-2xl font-medium tracking-wide mb-8">{priceStr}</p>
@@ -102,6 +109,12 @@ export default async function ProductPage({
                 {dict.product.price_on_request}
               </p>
             )}
+
+            {description ? (
+              <p className="text-sm text-[var(--muted)] leading-relaxed mb-8 whitespace-pre-line">
+                {description}
+              </p>
+            ) : null}
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-3 mb-8">
@@ -121,7 +134,7 @@ export default async function ProductPage({
                 {dict.contact.delivery_title}
               </p>
               <p className="text-sm text-[var(--muted)] leading-relaxed">
-                {dict.contact.delivery_body}
+                {delivery?.[locale] || dict.contact.delivery_body}
               </p>
             </div>
           </div>

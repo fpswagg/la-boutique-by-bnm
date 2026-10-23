@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@/lib/i18n";
 import { groupByCategory } from "@/lib/products";
-import { getAllProducts } from "@/lib/db/products";
+import { getAllProducts } from "@/lib/sss";
 import { ShareDialog } from "@/components/ui/ShareDialog";
 import { ProductsClient } from "@/components/sections/ProductsClient";
 import type { Locale } from "../../../../middleware";

@@ -46,7 +46,12 @@
     "order_whatsapp": "Order via WhatsApp",
     "order_message": "Hello, I would like to order:\n",
     "order_suffix": "\nPlease contact me to finalize the order.",
-    "liked_section": "Your favourites"
+    "liked_section": "Your favourites",
+    "your_name": "Your name (optional)",
+    "your_phone": "Your WhatsApp (optional)",
+    "order_ref": "Order no.",
+    "sending": "Sending…",
+    "order_note": "Your order is saved, then WhatsApp opens so you can confirm it with the seller."
   },
   "contact": {
     "title": "CONTACT",

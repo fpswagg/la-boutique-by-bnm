@@ -1,7 +1,19 @@
 export const dashboardFr = {
+  auth: {
+    intro: "Connectez-vous avec le compte SSS de La Boutique By BNM pour gérer les produits, les commandes et la boutique.",
+    signIn: "Se connecter avec SSS",
+    off: "La connexion SSS n'est pas encore configurée sur ce site.",
+    wrongBusiness: "Ce compte SSS n'est pas connecté à La Boutique By BNM. Reconnectez-vous et choisissez la bonne entreprise.",
+    switchAccount: "Changer de compte",
+    signOut: "Se déconnecter",
+    openSss: "Ouvrir SSS",
+    viewShop: "Voir la boutique",
+    readOnly: "lecture seule",
+  },
   nav: {
     accent: "tableau de bord",
     overview: "Vue d'ensemble",
+    orders: "Commandes",
     products: "Produits",
     createProduct: "Nouveau produit",
     storeConfig: "Configuration boutique",
@@ -16,8 +28,13 @@ export const dashboardFr = {
       lowStock: "Stock faible",
       orders: "Commandes",
       eventsToday: "Activité du jour",
+      pendingOrders: "Commandes à traiter",
+      views: "Vues",
     },
     recentEvents: "Dernières interactions",
+    recentOrders: "Dernières commandes",
+    allOrders: "Toutes les commandes",
+    allTimeViews: "Vues depuis le début",
     event: "Interaction",
     article: "Article",
     product: "Produit",
@@ -48,6 +65,30 @@ export const dashboardFr = {
     groupedEvents: "Répartition des interactions",
     count: "Nombre",
   },
+  orders: {
+    accent: "ventes",
+    title: "Commandes",
+    empty: "Aucune commande pour l'instant.",
+    hint: "Les commandes du site arrivent ici (et dans SSS → Commandes). « Livrée » sort les articles du stock et crée la facture dans SSS.",
+    ref: "Réf.",
+    client: "Client",
+    items: "Articles",
+    total: "Total",
+    status: "Statut",
+    date: "Date",
+    source: "Origine",
+    change: "Changer",
+    whatsapp: "WhatsApp",
+    statuses: {
+      pending: "À traiter",
+      paid: "Payée",
+      packed: "Préparée",
+      out_for_delivery: "En livraison",
+      delivered: "Livrée",
+      cancelled: "Annulée",
+    },
+    sources: { website: "Site", sss: "SSS" },
+  },
   products: {
     accent: "catalogue",
     title: "Produits",
@@ -57,7 +98,9 @@ export const dashboardFr = {
       name: "nom",
       price: "prix",
       stock: "stock",
+      views: "vues",
     },
+    search: "Rechercher (nom, réf., catégorie)",
     table: {
       product: "Produit",
       price: "Prix",
@@ -89,6 +132,7 @@ export const dashboardFr = {
       tags: "Mots-clés pour le filtre",
       images: "Images",
       currentImages: "Images actuelles",
+      showcase: "Mise en avant et mots-clés",
     },
     fields: {
       idOptional: "Adresse web du produit (optionnelle)",
@@ -106,6 +150,16 @@ export const dashboardFr = {
       categoryEn: "Catégorie (EN)",
       categoryTr: "Catégorie (TR)",
       priceHint: "Laisser vide pour « sur devis »",
+      translationHint: "Vide = le texte français est utilisé.",
+      categoriesHint: "Existantes :",
+      descriptionFr: "Description (FR)",
+      descriptionEn: "Description (EN)",
+      descriptionTr: "Description (TR)",
+      badge: "Badge",
+      badgeHint: "Petit mot sur la photo (ex. Nouveau, Promo). Vide = aucun.",
+      order: "Ordre d'affichage",
+      orderHint: "1 = en premier. Vide = après les autres, du plus récent au plus ancien.",
+      featured: "Mettre en avant sur l'accueil",
       price: "Prix",
       stock: "Stock",
       tags: "Mots-clés",
@@ -161,6 +215,11 @@ export const dashboardFr = {
       descriptionTr: "Description (TR)",
       opensAt: "Ouverture",
       closesAt: "Fermeture",
+      closed: "Fermé ce jour",
+      whatsapp: "WhatsApp (commandes)",
+      deliveryFr: "Livraison (FR)",
+      deliveryEn: "Livraison (EN)",
+      deliveryTr: "Livraison (TR)",
       labelFr: "Libellé (FR)",
       labelEn: "Libellé (EN)",
       labelTr: "Libellé (TR)",
@@ -220,6 +279,11 @@ export function dayLabelFr(day: string): string {
 export function analyticsEventLabelFr(event: string): string {
   const key = event as keyof typeof dashboardFr.overview.analyticsEvents;
   return dashboardFr.overview.analyticsEvents[key] ?? event;
+}
+
+export function orderStatusLabelFr(status: string): string {
+  const key = status as keyof typeof dashboardFr.orders.statuses;
+  return dashboardFr.orders.statuses[key] ?? status;
 }
 
 export function productStatusLabelFr(status: string): string {

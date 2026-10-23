@@ -11,8 +11,9 @@ export function buildWhatsAppOrderUrl(
   items: CartItem[],
   allProducts: Product[],
   locale: Locale,
-  dict: { order_message: string; order_suffix: string },
-  phone?: string
+  dict: { order_message: string; order_suffix: string; order_ref?: string },
+  phone?: string,
+  ref?: string | null
 ): string {
   const lines = items
     .map((item) => {
@@ -25,7 +26,8 @@ export function buildWhatsAppOrderUrl(
     .filter(Boolean)
     .join("\n");
 
-  const message = `${dict.order_message}${lines}${dict.order_suffix}`;
+  const refLine = ref ? `\n${dict.order_ref ?? "#"} ${ref}` : "";
+  const message = `${dict.order_message}${lines}${refLine}${dict.order_suffix}`;
   return `https://wa.me/${normalizePhone(phone)}?text=${encodeURIComponent(message)}`;
 }
 

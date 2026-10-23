@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { locales, type Locale } from "../../../middleware";
 import { getDictionary } from "@/lib/i18n";
-import { getStoreConfig } from "@/lib/db/store";
-import { STORE } from "@/constant";
+import { getStoreConfig } from "@/lib/sss";
 import { Providers } from "@/components/providers/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -47,19 +46,7 @@ export default async function LocaleLayout({
   const { locale } = params;
   const storeConfig = await getStoreConfig();
   const dict = getDictionary(locale);
-  const footerStore = storeConfig ?? {
-    id: "main",
-    name: STORE.name,
-    category: STORE.category,
-    description: STORE.description,
-    location: {
-      city: STORE.location.city,
-      country: STORE.location.country,
-      display: STORE.location.display,
-    },
-    email: STORE.email,
-    phone: STORE.phone,
-  };
+  const footerStore = storeConfig;
 
   return (
     <>

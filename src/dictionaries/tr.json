@@ -46,7 +46,12 @@
     "order_whatsapp": "WhatsApp ile sipariş ver",
     "order_message": "Merhaba, sipariş vermek istiyorum:\n",
     "order_suffix": "\nSiparişimi tamamlamak için lütfen benimle iletişime geçin.",
-    "liked_section": "Favorileriniz"
+    "liked_section": "Favorileriniz",
+    "your_name": "Adınız (isteğe bağlı)",
+    "your_phone": "WhatsApp numaranız (isteğe bağlı)",
+    "order_ref": "Sipariş no.",
+    "sending": "Gönderiliyor…",
+    "order_note": "Siparişiniz kaydedilir, ardından satıcıyla onaylamanız için WhatsApp açılır."
   },
   "contact": {
     "title": "İLETİŞİM",

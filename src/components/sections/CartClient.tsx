@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, MessageCircle, ArrowRight } from "lucide-react";
@@ -26,6 +27,9 @@ interface CartClientProps {
 
 export function CartClient({ dict, locale, allProducts, phone }: CartClientProps) {
   const { items, updateQty, removeItem } = useCart();
+  const [name, setName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [sending, setSending] = useState(false);
   const { likedIds } = useLikes();
 
   const likedProducts = likedIds
@@ -40,16 +44,37 @@ export function CartClient({ dict, locale, allProducts, phone }: CartClientProps
     return sum + (product.price ?? 0) * item.qty;
   }, 0);
 
-  const whatsappUrl = buildWhatsAppOrderUrl(
-    items,
-    allProducts,
-    locale,
-    {
-      order_message: dict.cart.order_message,
-      order_suffix: dict.cart.order_suffix,
-    },
-    phone
-  );
+  const orderDict = {
+    order_message: dict.cart.order_message,
+    order_suffix: dict.cart.order_suffix,
+    order_ref: dict.cart.order_ref,
+  };
+  const whatsappUrl = buildWhatsAppOrderUrl(items, allProducts, locale, orderDict, phone);
+
+  /** Saves the order in SSS (with its number), then opens WhatsApp. WhatsApp opens even if SSS fails. */
+  async function order(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    if (sending) return;
+    setSending(true);
+    let ref: string | null = null;
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ items, locale, name, phone: customerPhone }),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      const data = (await res.json().catch(() => ({}))) as { ref?: string | null };
+      ref = data.ref ?? null;
+    } catch {
+      // offline or slow: WhatsApp alone
+    }
+    window.location.href = buildWhatsAppOrderUrl(items, allProducts, locale, orderDict, phone, ref);
+    setTimeout(() => setSending(false), 1500);
+  }
 
   return (
     <div className="grid lg:grid-cols-3 gap-12">
@@ -190,15 +215,36 @@ export function CartClient({ dict, locale, allProducts, phone }: CartClientProps
               <span>{total > 0 ? formatPrice(total, "FCFA") : "—"}</span>
             </div>
 
+            <div className="space-y-3 mb-4">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={dict.cart.your_name}
+                autoComplete="name"
+                maxLength={120}
+                className="w-full border border-[var(--border)] bg-transparent px-4 py-3 text-sm outline-none focus:border-[var(--fg)] transition-colors"
+              />
+              <input
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                placeholder={dict.cart.your_phone}
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={30}
+                className="w-full border border-[var(--border)] bg-transparent px-4 py-3 text-sm outline-none focus:border-[var(--fg)] transition-colors"
+              />
+            </div>
+
             <a
               href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 w-full px-5 py-4 bg-[var(--accent)] text-white text-sm font-medium tracking-widest uppercase hover:opacity-90 active:scale-95 transition-all"
+              onClick={order}
+              aria-busy={sending}
+              className={`flex items-center justify-center gap-3 w-full px-5 py-4 bg-[var(--accent)] text-white text-sm font-medium tracking-widest uppercase hover:opacity-90 active:scale-95 transition-all ${sending ? "opacity-70 pointer-events-none" : ""}`}
             >
               <MessageCircle size={18} />
-              {dict.cart.order_whatsapp}
+              {sending ? dict.cart.sending : dict.cart.order_whatsapp}
             </a>
+            <p className="mt-3 text-xs text-[var(--muted)] leading-relaxed">{dict.cart.order_note}</p>
           </div>
         </div>
       )}

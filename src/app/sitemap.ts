@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 import { locales } from "../../middleware";
-import { getAllProducts } from "@/lib/db/products";
+import { getAllProducts } from "@/lib/sss";
+import { config } from "@/lib/config";
 
-const BASE_URL = "https://laboutique-bnm.com";
+const BASE_URL = config.siteUrl;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getAllProducts();

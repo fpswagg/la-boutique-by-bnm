@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { MapPin, Package, Truck } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
-import { STORE } from "@/constant";
-import { getOpeningHours, getStoreConfig } from "@/lib/db/store";
+import { getDeliveryText, getOpeningHours, getStoreConfig } from "@/lib/sss";
 import { ContactChat } from "@/components/sections/ContactChat";
 import { OpeningHours } from "@/components/sections/OpeningHours";
 import { buildWhatsAppContactUrl } from "@/lib/whatsapp";
@@ -24,34 +23,12 @@ export default async function ContactPage({
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
-  const [dbStoreConfig, dbOpeningHours] = await Promise.all([
+  const [storeConfig, openingHours, delivery] = await Promise.all([
     getStoreConfig(),
     getOpeningHours(),
+    getDeliveryText(),
   ]);
-  const storeConfig = dbStoreConfig ?? {
-    id: "main",
-    name: STORE.name,
-    category: STORE.category,
-    description: STORE.description,
-    location: {
-      city: STORE.location.city,
-      country: STORE.location.country,
-      display: STORE.location.display,
-    },
-    email: STORE.email,
-    phone: STORE.phone,
-  };
   const whatsappUrl = buildWhatsAppContactUrl(dict.contact.bubble_1, storeConfig.phone);
-  const openingHours =
-    dbOpeningHours.length > 0
-      ? dbOpeningHours
-      : STORE.openingHours.map((slot, i) => ({
-          day: slot.day,
-          order: i,
-          label: slot.label,
-          opensAt: slot.opensAt,
-          closesAt: slot.closesAt,
-        }));
 
   return (
     <div className="pt-24 min-h-screen">
@@ -89,7 +66,7 @@ export default async function ContactPage({
                     <Truck size={18} className="text-[var(--muted)]" />
                   </div>
                   <p className="text-sm text-[var(--muted)] leading-relaxed">
-                    {dict.contact.delivery_body}
+                    {delivery?.[locale] || dict.contact.delivery_body}
                   </p>
                 </div>
 

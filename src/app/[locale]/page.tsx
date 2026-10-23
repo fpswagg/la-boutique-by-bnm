@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, MapPin, Mail, Phone } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
-import { getAllProducts } from "@/lib/db/products";
-import { getOpeningHours, getStoreConfig } from "@/lib/db/store";
-import { STORE } from "@/constant";
+import { getFeaturedProducts, getOpeningHours, getStoreConfig } from "@/lib/sss";
 import { Banner } from "@/components/layout/Banner";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { ShareDialog } from "@/components/ui/ShareDialog";
@@ -19,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   return {
     title: "La Boutique by BNM",
-    description: STORE.description[params.locale],
+    description: (await getStoreConfig()).description[params.locale],
     alternates: {
       languages: {
         fr: "/fr",
@@ -37,35 +35,11 @@ export default async function HomePage({
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
-  const [products, dbStoreConfig, dbOpeningHours] = await Promise.all([
-    getAllProducts(),
+  const [featured, storeConfig, openingHours] = await Promise.all([
+    getFeaturedProducts(6),
     getStoreConfig(),
     getOpeningHours(),
   ]);
-  const featured = products.slice(0, 6);
-  const storeConfig = dbStoreConfig ?? {
-    id: "main",
-    name: STORE.name,
-    category: STORE.category,
-    description: STORE.description,
-    location: {
-      city: STORE.location.city,
-      country: STORE.location.country,
-      display: STORE.location.display,
-    },
-    email: STORE.email,
-    phone: STORE.phone,
-  };
-  const openingHours =
-    dbOpeningHours.length > 0
-      ? dbOpeningHours
-      : STORE.openingHours.map((slot, i) => ({
-          day: slot.day,
-          order: i,
-          label: slot.label,
-          opensAt: slot.opensAt,
-          closesAt: slot.closesAt,
-        }));
 
   return (
     <div>

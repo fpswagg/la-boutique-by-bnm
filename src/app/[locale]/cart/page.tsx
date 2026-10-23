@@ -1,8 +1,6 @@
 import { getDictionary } from "@/lib/i18n";
 import { CartClient } from "@/components/sections/CartClient";
-import { getAllProducts } from "@/lib/db/products";
-import { getStoreConfig } from "@/lib/db/store";
-import { STORE } from "@/constant";
+import { getAllProducts, getStoreConfig } from "@/lib/sss";
 import type { Locale } from "../../../../middleware";
 import type { Metadata } from "next";
 
@@ -26,7 +24,7 @@ export default async function CartPage({
     getAllProducts(),
     getStoreConfig(),
   ]);
-  const phone = storeConfig?.phone ?? STORE.phone;
+  const phone = storeConfig.phone;
 
   return (
     <div className="pt-24 min-h-screen">

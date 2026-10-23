@@ -2,7 +2,7 @@
 
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "../../../middleware";
-import type { OpeningHourRecord } from "@/lib/db/store";
+import type { OpeningHourRecord } from "@/lib/sss";
 
 interface OpeningHoursProps {
   dict: Dictionary;
@@ -47,7 +47,9 @@ export function OpeningHours({ dict, locale, openingHours }: OpeningHoursProps) 
               <span className="w-28">{slot.label[locale]}</span>
               <span className="flex-1 border-b border-dashed border-[var(--border)]" />
               <span>
-                {msToTime(slot.opensAt)} — {msToTime(slot.closesAt)}
+                {slot.opensAt === slot.closesAt
+                  ? dict.common.closed_now
+                  : `${msToTime(slot.opensAt)} — ${msToTime(slot.closesAt)}`}
               </span>
               {isToday && (
                 <span
