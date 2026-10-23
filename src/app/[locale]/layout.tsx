@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { locales, type Locale } from "../../../middleware";
 import { getDictionary } from "@/lib/i18n";
-import { getStoreConfig } from "@/lib/sss";
+import { getAssistant, getStoreConfig } from "@/lib/sss";
+import { config } from "@/lib/config";
+import { Assistant } from "@/components/ui/Assistant";
 import { Providers } from "@/components/providers/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -44,7 +46,7 @@ export default async function LocaleLayout({
   params: { locale: Locale };
 }) {
   const { locale } = params;
-  const storeConfig = await getStoreConfig();
+  const [storeConfig, assistant] = await Promise.all([getStoreConfig(), getAssistant()]);
   const dict = getDictionary(locale);
   const footerStore = storeConfig;
 
@@ -55,6 +57,7 @@ export default async function LocaleLayout({
         <Navbar dict={dict} locale={locale} />
         <main className="min-h-screen">{children}</main>
         <Footer dict={dict} locale={locale} store={footerStore} />
+        {assistant ? <Assistant apiUrl={config.apiUrl} assistant={assistant} dict={dict} /> : null}
       </Providers>
     </>
   );

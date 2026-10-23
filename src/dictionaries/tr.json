@@ -84,5 +84,28 @@
     "closed_now": "Kapalı",
     "opens_at": "Açılış",
     "closes_at": "Kapanış"
+  },
+  "assistant": {
+    "name": "Asistan",
+    "subtitle": "Yapay zekâ asistanı · 7/24 yanıt verir",
+    "open": "Sorunuz mu var?",
+    "ask_product": "Bu ürün hakkında soru sor",
+    "ask_product_prefill": "Merhaba, “{name}” hakkında bir sorum var: ",
+    "contact_cta": "Asistana sor",
+    "new_chat": "Yeni sohbet",
+    "close": "Kapat",
+    "placeholder": "Mesajınızı yazın…",
+    "send": "Gönder",
+    "typing": "Yazıyor…",
+    "greeting": "Merhaba! Ben La Boutique by BNM asistanıyım. Fiyatlar, stok durumu, Yaoundé'de teslimat: sorun yeter.",
+    "suggestions": [
+      "Hangi kulaklıklarınız var?",
+      "Benim mahalleme teslimat yapıyor musunuz?",
+      "Nasıl ödeme yapabilirim?",
+      "Sipariş vermek istiyorum"
+    ],
+    "error": "Asistan şu anda kullanılamıyor.",
+    "rate": "Çok hızlı yazıyorsunuz. Biraz bekleyip tekrar deneyin.",
+    "use_shop_texts": false
   }
 }

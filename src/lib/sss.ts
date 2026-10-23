@@ -346,3 +346,27 @@ export async function sendContact(input: { name: string; phone?: string; email?:
     throw new SssUnavailableError(str(obj(body.error).message) || `SSS answered ${res.status}`, res.status);
   }
 }
+
+// ── Customer assistant (SSS → Customer bot) ──────────────────────────────────
+
+export type AssistantProfile = {
+  publicKey: string;
+  name: string;
+  avatarUrl: string | null;
+  greeting: string;
+  suggestions: string[];
+};
+
+/** The business's AI customer assistant, as published with the showcase (null when off). */
+export async function getAssistant(): Promise<AssistantProfile | null> {
+  const bot = (await getShowcase())?.chatbot;
+  const publicKey = bot ? str(bot.publicKey) : "";
+  if (!bot || !publicKey) return null;
+  return {
+    publicKey,
+    name: str(bot.name) || "Assistant",
+    avatarUrl: str(bot.avatarUrl) || null,
+    greeting: str(bot.greeting),
+    suggestions: arr(bot.suggestions).map(str).filter(Boolean).slice(0, 4),
+  };
+}

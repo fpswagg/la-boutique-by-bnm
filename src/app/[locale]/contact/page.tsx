@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { MapPin, Package, Truck } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
-import { getDeliveryText, getOpeningHours, getStoreConfig } from "@/lib/sss";
+import { getAssistant, getDeliveryText, getOpeningHours, getStoreConfig } from "@/lib/sss";
+import { AskAssistantButton } from "@/components/ui/Assistant";
 import { ContactChat } from "@/components/sections/ContactChat";
 import { OpeningHours } from "@/components/sections/OpeningHours";
 import { buildWhatsAppContactUrl } from "@/lib/whatsapp";
@@ -23,10 +24,11 @@ export default async function ContactPage({
 }) {
   const { locale } = params;
   const dict = getDictionary(locale);
-  const [storeConfig, openingHours, delivery] = await Promise.all([
+  const [storeConfig, openingHours, delivery, assistant] = await Promise.all([
     getStoreConfig(),
     getOpeningHours(),
     getDeliveryText(),
+    getAssistant(),
   ]);
   const whatsappUrl = buildWhatsAppContactUrl(dict.contact.bubble_1, storeConfig.phone);
 
@@ -47,6 +49,14 @@ export default async function ContactPage({
           {/* Chat bubbles + CTA */}
           <div>
             <ContactChat dict={dict} whatsappUrl={whatsappUrl} />
+            {assistant ? (
+              <div className="mt-6 flex justify-end">
+                <AskAssistantButton
+                  label={dict.assistant.contact_cta}
+                  className="flex items-center gap-3 border border-[var(--fg)] px-6 py-4 text-sm font-medium tracking-wide hover:bg-[var(--fg)] hover:text-[var(--bg)] transition-colors"
+                />
+              </div>
+            ) : null}
           </div>
 
           {/* Right column */}

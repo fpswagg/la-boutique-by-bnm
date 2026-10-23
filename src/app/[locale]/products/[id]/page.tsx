@@ -7,6 +7,7 @@ import { getProductName, formatPrice } from "@/lib/products";
 import {
   getAllProducts,
   getDeliveryText,
+  getAssistant,
   getProductById,
   getRelatedProducts,
 } from "@/lib/sss";
@@ -15,6 +16,7 @@ import { ImageGallery } from "@/components/ui/ImageGallery";
 import { LikeButton } from "@/components/ui/LikeButton";
 import { CartButton } from "@/components/ui/CartButton";
 import { ShareDialog } from "@/components/ui/ShareDialog";
+import { AskAssistantButton } from "@/components/ui/Assistant";
 import { ProductCard } from "@/components/ui/ProductCard";
 import type { Locale } from "../../../../../middleware";
 
@@ -58,9 +60,10 @@ export default async function ProductPage({
   const priceStr = product.price !== null
     ? formatPrice(product.price, product.currency)
     : null;
-  const [relatedAll, delivery] = await Promise.all([
+  const [relatedAll, delivery, assistant] = await Promise.all([
     getRelatedProducts(product.id, locale),
     getDeliveryText(),
+    getAssistant(),
   ]);
   const related = relatedAll.slice(0, 4);
   const description = product.description[locale] || product.description.fr;
@@ -127,6 +130,14 @@ export default async function ProductPage({
               <LikeButton productId={product.id} />
               <ShareDialog dict={dict} title={name} />
             </div>
+
+            {assistant ? (
+              <AskAssistantButton
+                label={dict.assistant.ask_product}
+                prefill={dict.assistant.ask_product_prefill.replace("{name}", name)}
+                className="self-start flex items-center gap-2 text-sm underline underline-offset-4 decoration-[var(--border)] hover:decoration-[var(--fg)] mb-8 -mt-2"
+              />
+            ) : null}
 
             {/* Divider */}
             <div className="border-t border-[var(--border)] pt-6">

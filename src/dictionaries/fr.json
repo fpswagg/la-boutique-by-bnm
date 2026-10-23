@@ -84,5 +84,28 @@
     "closed_now": "Fermé",
     "opens_at": "Ouvre à",
     "closes_at": "Ferme à"
+  },
+  "assistant": {
+    "name": "Assistant",
+    "subtitle": "Assistant IA · répond 24h/24",
+    "open": "Une question ?",
+    "ask_product": "Poser une question sur ce produit",
+    "ask_product_prefill": "Bonjour, une question sur « {name} » : ",
+    "contact_cta": "Demander à l'assistant",
+    "new_chat": "Nouvelle discussion",
+    "close": "Fermer",
+    "placeholder": "Écrivez votre message…",
+    "send": "Envoyer",
+    "typing": "Écrit…",
+    "greeting": "Bonjour ! Je suis l'assistant de La Boutique by BNM. Prix, disponibilité, livraison à Yaoundé : demandez-moi.",
+    "suggestions": [
+      "Quels écouteurs avez-vous ?",
+      "Livrez-vous dans mon quartier ?",
+      "Comment payer ?",
+      "Je veux commander"
+    ],
+    "error": "L'assistant n'est pas disponible pour le moment.",
+    "rate": "Vous écrivez vite. Patientez un instant puis réessayez.",
+    "use_shop_texts": true
   }
 }

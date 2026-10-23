@@ -84,5 +84,28 @@
     "closed_now": "Closed",
     "opens_at": "Opens at",
     "closes_at": "Closes at"
+  },
+  "assistant": {
+    "name": "Assistant",
+    "subtitle": "AI assistant · answers 24/7",
+    "open": "Any question?",
+    "ask_product": "Ask about this product",
+    "ask_product_prefill": "Hello, a question about “{name}”: ",
+    "contact_cta": "Ask the assistant",
+    "new_chat": "New chat",
+    "close": "Close",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "typing": "Typing…",
+    "greeting": "Hello! I'm the La Boutique by BNM assistant. Prices, availability, delivery in Yaoundé: just ask.",
+    "suggestions": [
+      "Which earphones do you have?",
+      "Do you deliver to my area?",
+      "How can I pay?",
+      "I want to order"
+    ],
+    "error": "The assistant is not available right now.",
+    "rate": "You are writing quickly. Wait a moment and try again.",
+    "use_shop_texts": false
   }
 }
