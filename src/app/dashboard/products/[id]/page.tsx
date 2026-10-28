@@ -13,12 +13,14 @@ import { ProductDuplicateForm } from "../../_components/ProductDuplicateForm";
 import { ProductFields } from "../../_components/ProductFields";
 
 export default async function EditProductPage({
-  params,
-  searchParams,
+  params: _params,
+  searchParams: _searchParams,
 }: {
-  params: { id: string };
-  searchParams: { saved?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
+  const params = await _params;
+  const searchParams = await _searchParams;
   const ctx = await requireDash();
   const [product, all] = await Promise.all([dashProduct(ctx, decodeURIComponent(params.id)), dashProducts(ctx)]);
   if (!product) notFound();

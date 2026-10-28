@@ -8,20 +8,22 @@ import { OpeningHours } from "@/components/sections/OpeningHours";
 import { buildWhatsAppContactUrl } from "@/lib/whatsapp";
 import type { Locale } from "../../../../middleware";
 
-export function generateMetadata({
-  params,
+export async function generateMetadata({
+  params: _params,
 }: {
-  params: { locale: Locale };
-}): Metadata {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const params = await _params;
   const dict = getDictionary(params.locale);
   return { title: dict.contact.title };
 }
 
 export default async function ContactPage({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
+  const params = await _params;
   const { locale } = params;
   const dict = getDictionary(locale);
   const [storeConfig, openingHours, delivery, assistant] = await Promise.all([

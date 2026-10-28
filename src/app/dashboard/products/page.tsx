@@ -8,10 +8,11 @@ import { ProductDuplicateForm } from "../_components/ProductDuplicateForm";
 import { ProductStockToggle } from "../_components/ProductStockToggle";
 
 export default async function DashboardProductsPage({
-  searchParams,
+  searchParams: _searchParams,
 }: {
-  searchParams?: { sort?: string; dir?: "asc" | "desc"; q?: string };
+  searchParams?: Promise<{ sort?: string; dir?: "asc" | "desc"; q?: string }>;
 }) {
+  const searchParams = await _searchParams;
   const ctx = await requireDash();
   const q = (searchParams?.q ?? "").trim().toLowerCase();
   const sort = searchParams?.sort ?? "postedAt";

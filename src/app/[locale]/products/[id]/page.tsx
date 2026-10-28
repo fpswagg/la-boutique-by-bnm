@@ -26,10 +26,11 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale; id: string };
-}): Promise<Metadata> {
+  params: Promise<{ locale: Locale; id: string }>;
+}): Promise<Metadata>{
+  const params = await _params;
   const product = await getProductById(params.id);
   if (!product) return {};
   const dict = getDictionary(params.locale);
@@ -46,10 +47,11 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale; id: string };
+  params: Promise<{ locale: Locale; id: string }>;
 }) {
+  const params = await _params;
   const { locale, id } = params;
   const product = await getProductById(id);
   if (!product) notFound();

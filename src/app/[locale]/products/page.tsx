@@ -6,11 +6,12 @@ import { ShareDialog } from "@/components/ui/ShareDialog";
 import { ProductsClient } from "@/components/sections/ProductsClient";
 import type { Locale } from "../../../../middleware";
 
-export function generateMetadata({
-  params,
+export async function generateMetadata({
+  params: _params,
 }: {
-  params: { locale: Locale };
-}): Metadata {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const params = await _params;
   const dict = getDictionary(params.locale);
   return {
     title: dict.products.title,
@@ -19,10 +20,11 @@ export function generateMetadata({
 }
 
 export default async function ProductsPage({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
+  const params = await _params;
   const { locale } = params;
   const dict = getDictionary(locale);
   const products = await getAllProducts();

@@ -48,7 +48,7 @@ export async function dashState(): Promise<DashState> {
   const business = dashboardBusiness(session);
   if (!business) return { kind: "wrong_business", session };
   if (session.expiresAt - EARLY_REFRESH_MS <= Date.now()) {
-    const here = headers().get("x-pathname");
+    const here = (await headers()).get("x-pathname");
     redirect(`/auth/sss/refresh?next=${encodeURIComponent(safeNext(here))}`);
   }
   return {

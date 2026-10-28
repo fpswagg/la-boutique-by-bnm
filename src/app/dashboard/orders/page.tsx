@@ -11,7 +11,8 @@ function waLink(phone: string, ref: string) {
   return `https://wa.me/${full}?text=${encodeURIComponent(`Bonjour, au sujet de votre commande ${ref} chez La Boutique By BNM :`)}`;
 }
 
-export default async function DashboardOrdersPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function DashboardOrdersPage({ searchParams: _searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const searchParams = await _searchParams;
   const ctx = await requireDash();
   const all = await dashOrders(ctx);
   const filter = searchParams.status && (ORDER_STATUSES as readonly string[]).includes(searchParams.status) ? searchParams.status : "";

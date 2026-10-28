@@ -11,6 +11,6 @@ export async function POST(request: Request) {
   if (!config.revalidateSecret || secret !== config.revalidateSecret) {
     return NextResponse.json({ error: "Wrong or missing secret" }, { status: 401 });
   }
-  revalidateTag(SSS_TAG);
+  revalidateTag(SSS_TAG, { expire: 0 });
   return NextResponse.json({ revalidated: true, at: new Date().toISOString() });
 }

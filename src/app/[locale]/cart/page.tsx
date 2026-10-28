@@ -4,20 +4,22 @@ import { getAllProducts, getStoreConfig } from "@/lib/sss";
 import type { Locale } from "../../../../middleware";
 import type { Metadata } from "next";
 
-export function generateMetadata({
-  params,
+export async function generateMetadata({
+  params: _params,
 }: {
-  params: { locale: Locale };
-}): Metadata {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const params = await _params;
   const dict = getDictionary(params.locale);
   return { title: dict.cart.title };
 }
 
 export default async function CartPage({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
+  const params = await _params;
   const { locale } = params;
   const dict = getDictionary(locale);
   const [allProducts, storeConfig] = await Promise.all([

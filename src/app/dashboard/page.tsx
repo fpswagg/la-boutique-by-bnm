@@ -27,7 +27,8 @@ function Card({ label, value, href }: { label: string; value: number | string; h
   );
 }
 
-export default async function DashboardOverviewPage({ searchParams }: { searchParams: { window?: string } }) {
+export default async function DashboardOverviewPage({ searchParams: _searchParams }: { searchParams: Promise<{ window?: string }> }) {
+  const searchParams = await _searchParams;
   const ctx = await requireDash();
   const window = parseWindow(searchParams.window);
   const days = WINDOW_DAYS[window];

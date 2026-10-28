@@ -18,7 +18,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default async function StoreConfigPage({ searchParams }: { searchParams: { saved?: string } }) {
+export default async function StoreConfigPage({ searchParams: _searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const searchParams = await _searchParams;
   const ctx = await requireDash();
   const store = await dashStore(ctx);
   const meta = store.meta;

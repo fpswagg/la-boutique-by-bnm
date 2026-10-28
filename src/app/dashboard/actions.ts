@@ -38,7 +38,7 @@ function toSlug(value: string): string {
 }
 
 function refreshShop() {
-  revalidateTag(SSS_TAG);
+  revalidateTag(SSS_TAG, { expire: 0 });
   revalidatePath("/", "layout");
 }
 

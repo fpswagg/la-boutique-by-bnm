@@ -11,10 +11,11 @@ import { OpeningHours } from "@/components/sections/OpeningHours";
 import type { Locale } from "../../../middleware";
 
 export async function generateMetadata({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata>{
+  const params = await _params;
   return {
     title: "La Boutique by BNM",
     description: (await getStoreConfig()).description[params.locale],
@@ -29,10 +30,11 @@ export async function generateMetadata({
 }
 
 export default async function HomePage({
-  params,
+  params: _params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
+  const params = await _params;
   const { locale } = params;
   const dict = getDictionary(locale);
   const [featured, storeConfig, openingHours] = await Promise.all([
